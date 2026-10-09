@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated database (rebuild with src/data_loading.py)
+*.db
+*.sqlite
+
+# OS / archive junk
+.DS_Store
+Thumbs.db
+__MACOSX/
+._*
+
+# Editors
+.vscode/
+.idea/
