@@ -4,7 +4,7 @@ Everything we know and decided. Source for the slides.
 
 ## Task (a): Final ranking
 
-- **What we predict:** each team's position (1–5) in its division, the `rank` column.
+- **What we predict:** each team's position in its division, the `rank` column (1st to last; from 1979 divisions had 4 to 7 teams).
 - **Season to predict:** any season requested, using only data from before it.
 - **We can use:** anything known the day before the first game, including the new season's rosters.
 - **Who wants it:** stakeholders (club management, sponsors, the league) and betting: know before the season how teams will finish.
@@ -25,6 +25,16 @@ Everything we know and decided. Source for the slides.
 - 1909–2009, leagues NHA, NHL, PCHA, WCHL, WHA. 2004 is missing (lockout).
 - Teams move cities: follow a team with `franchID`, not `tmID`.
 - About 1 in 4 NHL teams starts a season with a new coach.
+
+## Data preparation
+
+- **Data used:** NHL only, 1979–2009 (753 team-seasons). From 1979 the NHL is the only league in the data; earlier leagues are small and from a different era. (Proposed, confirm with the group.)
+- **Team table:** one row per team per season, saved in `data/team_table.csv`. Built in `notebooks/02_data_preparation.ipynb`.
+- **Per game:** points and goals are divided by games played, because season lengths changed.
+- **Compared to the season average:** goals scored and conceded are divided by that season's league average (1.0 = average), because scoring levels changed over time.
+- **Last season:** taken from the same club (`franchID`), so teams that moved city keep their history. For 2005, last season is 2003 (2004 lockout).
+- **Division size:** kept as a column (4 to 7 teams), because 5th of 5 is last but 5th of 7 is not.
+- **New teams:** 13 team-seasons have no previous NHL season (the 4 ex-WHA teams in 1979 and 9 expansion teams). Their last-season columns are empty. How to fill them is a group decision.
 
 ## Tables
 
@@ -53,11 +63,11 @@ Everything we know and decided. Source for the slides.
 
 | Plot | Finding |
 |---|---|
-| teams_per_season.png | |
-| missing_teams.png | |
-| points_last_vs_this.png | |
-| goals_per_game.png | |
-| gf_ga_points.png | |
-| correlations.png | |
-| coach_changes.png | |
-| coach_change_vs_results.png | |
+| [teams_per_season.png](../figures/teams_per_season.png) | The NHA, PCHA and WCHL overlapped with the early NHL until 1925, and the WHA ran alongside it from 1972 to 1978. From 1979 the NHL is the only league, growing from 21 to 30 teams by 2000. |
+| [missing_teams.png](../figures/missing_teams.png) | |
+| [points_last_vs_this.png](../figures/points_last_vs_this.png) | Points per game last season and this season have a correlation of 0.64 (0.62 for 1979–2009 only): a team's previous season is a good guide to the next, but far from perfect, so other information (like roster changes) is needed. |
+| [goals_per_game.png](../figures/goals_per_game.png) | Goals per game change a lot over time: lowest in 1928 (1.5), a jump during World War II, a peak in the 1980s (about 4.0), then down to about 2.6 by the early 2000s. Even within 1979–2009 scoring levels differ, so team stats are compared to their season's average. |
+| [gf_ga_points.png](../figures/gf_ga_points.png) | |
+| [correlations.png](../figures/correlations.png) | |
+| [coach_changes.png](../figures/coach_changes.png) | |
+| [coach_change_vs_results.png](../figures/coach_change_vs_results.png) | |
