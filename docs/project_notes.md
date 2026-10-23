@@ -1,6 +1,17 @@
 # Project Notes
 
-Everything we know and decided. Source for the slides.
+Everything we know and decided. Source for the slides. Who does what: `docs/task_board.md`.
+
+## Methodology
+
+We follow CRISP-DM, the data mining method from class 1. Its six phases and where we are:
+
+1. **Business understanding:** done (Task (a) and Task (b) below).
+2. **Data understanding:** table descriptions done; plots and findings in progress.
+3. **Data preparation:** team table done; coach table, roster information, missing values and outliers in progress.
+4. **Modeling:** next (simple guesses and first models before the checkpoint).
+5. **Evaluation:** after the checkpoint.
+6. **Deployment:** final predictions and presentation.
 
 ## Task (a): Final ranking
 
