@@ -4,7 +4,6 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## To do
 
-- [Person 1] Roster information for (a): how good each team's players were last season
 - [Person 1] Season-by-season test loop (train on earlier seasons, predict the next)
 - [Person 1] Simple guess for (a): same position as last season, scored with the test loop
 - [Person 1] First model for (a)
@@ -29,3 +28,4 @@ Move a task to the right section when its status changes. Owner in brackets.
 - [Group] Description of every table (`notebooks/01_data_overview.ipynb`, `docs/project_notes.md`)
 - [Person 1] Plots: teams per season, points last vs this season, goals per game, with findings
 - [Person 1] Team table, one row per team per season (`data/team_table.csv`)
+- [Person 1] Roster information for (a): how good each team's players were last season

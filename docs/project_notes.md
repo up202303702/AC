@@ -46,6 +46,9 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 - **Last season:** taken from the same club (`franchID`), so teams that moved city keep their history. For 2005, last season is 2003 (2004 lockout).
 - **Division size:** kept as a column (4 to 7 teams), because 5th of 5 is last but 5th of 7 is not.
 - **New teams:** 13 team-seasons have no previous NHL season (the 4 ex-WHA teams in 1979 and 9 expansion teams). Their last-season columns are empty. How to fill them is a group decision.
+- **Roster:** for each team-season, last season's points of its players (`roster_pts_vs_avg`) and goals conceded per 60 minutes by its goalies (`roster_goalie_ga_vs_avg`), both compared to the season average. Roster = players whose first spell of the season was with that team.
+- **Roster finding:** it adds little beyond last season's team points (a simple model explains 38.2% without it, 38.7% with it), because most players stay with the same team. It does give values for the 13 new teams.
+- **Roster limits:** includes players called up during the season; the 4 ex-WHA teams in 1979 use WHA stats, which are inflated (Quebec 1.56).
 
 ## Tables
 
