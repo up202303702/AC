@@ -29,7 +29,7 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 - **We can use:** anything known the day before the first game, except the new season's coach (that is the answer).
 - **Who wants it:** stakeholders (club management, sponsors, the league) and betting: know before the season which teams will have a new coach.
 - **Missing a real change is much worse than a false alarm.** So we measure how many real changes we catch ("recall"), and check how many false alarms we raise ("precision").
-- **Simple guess to beat:** a team gets a new coach if it missed the playoffs last season.
+- **Simple guess to beat:** inside each division, the same order as last season's points per game (new teams last). Scores 1.07 positions off on average over 2000–2009; random order scores 1.55.
 
 ## Data facts
 

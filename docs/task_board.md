@@ -4,8 +4,6 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## To do
 
-- [Person 1] Season-by-season test loop (train on earlier seasons, predict the next)
-- [Person 1] Simple guess for (a): same position as last season, scored with the test loop
 - [Person 1] First model for (a)
 - [Person 2] Plot: coach changes per season, with finding
 - [Person 2] Plot: last season's results, kept vs changed coach (with test), with finding
@@ -29,3 +27,5 @@ Move a task to the right section when its status changes. Owner in brackets.
 - [Person 1] Plots: teams per season, points last vs this season, goals per game, with findings
 - [Person 1] Team table, one row per team per season (`data/team_table.csv`)
 - [Person 1] Roster information for (a): how good each team's players were last season
+- [Person 1] Season-by-season test loop (train on earlier seasons, predict the next)
+- [Person 1] Simple guess for (a): same position as last season, scored with the test loop
