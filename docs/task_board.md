@@ -14,7 +14,6 @@ Move a task to the right section when its status changes. Owner in brackets.
 - [Person 3] 6 data quality checks
 - [Person 3] List of missing and odd values, with a proposed decision for each
 - [Person 3] Apply the agreed decisions and save the final table (needed before the first models)
-- [Group] Confirm the data used: NHL only, 1979–2009
 - [Group] Agree on Person 3's decisions, including how to fill the 13 new teams
 - [Group] Task (c), once announced
 
@@ -22,6 +21,7 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## Done
 
+- [Group] Confirm the data used: NHL only, 1979–2009
 - [Group] Business understanding: goals, who wants it, how we measure it, simple guesses to beat
 - [Group] Description of every table (`notebooks/01_data_overview.ipynb`, `docs/project_notes.md`)
 - [Person 1] Plots: teams per season, points last vs this season, goals per game, with findings
