@@ -69,6 +69,30 @@ Result: for the linear model the practice test chose **3 inputs in all 9 seasons
 | Linear | 1.08 | **1.02** | 5 / 3 / 1 | 16% chance: not proven |
 | Forest | 1.02 | 1.07 | 5 / 1 / 3 | 98% chance: no real difference |
 
+## 6b. New inputs: can we predict changes from last season?
+
+We added three inputs that might explain why a team does better or worse than last season:
+
+- **3-season average:** one great season can be luck; three are not.
+- **Roster change:** points of the players who arrived minus those of the players who left.
+- **New coach this season:** known before the season, so allowed here.
+
+The practice test chose between them before each season. Result: **0.985 positions off**, the first result below 1, better than the simple guess in 6 of 9 seasons. The chance that this is luck is 8%: closer to the 5% bar, but still not proven. The new coach and the 3-season average were chosen; roster change never was, because it hardly relates to where teams finish.
+
+**But careful:** that 0.985 came from the practice test switching inputs from season to season. With the same 5 inputs every season, the linear model scores 1.04. So the gain is fragile.
+
+## 6c. Other kinds of model
+
+We tried three more ways of learning, all with the same inputs and the practice test choosing their settings:
+
+- **Decision tree:** a chain of yes/no questions. 1.14: worse than the simple guess, but easy to read (`figures/decision_tree_a.png`). It first asks *"was last season's points above 1.09 of the average?"*, then looks at the 3-season average and the goalies.
+- **k-nearest neighbours:** looks for the 25 most similar past teams and copies how they finished. 1.07: same as the simple guess.
+- **Gradient boosting:** many small trees, each fixing the previous one's mistakes. 1.07, and it memorises a bit (0.84 on the seasons it learned from).
+
+None beats the linear model, and none is proven better than the simple guess.
+
+**Which inputs matter** (`figures/feature_importance_a.png`): we scramble one input at a time and see how much worse the predictions get. Last season's points: +0.22 positions off when scrambled, by far the most. 3-season average: +0.09. Players and goalies: a little. New coach: nothing.
+
 ## 7. What to say if asked
 
 - "Predicting the final ranking before the season is hard: last season explains most of it, and the rest is in-season events we cannot see."

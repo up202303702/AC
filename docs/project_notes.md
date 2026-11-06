@@ -50,6 +50,7 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 - **Roster finding:** it adds little beyond last season's team points (a simple model explains 36.8% without it, 37.8% with it), because most players stay with the same team. It does give values for the 13 new teams.
 - **Roster limits:** includes players called up during the season; the 4 ex-WHA teams in 1979 use WHA stats, which are inflated (Quebec 1.53); goalies with no earlier NHL season are left out of the goalie value (16 teams where they played over half the minutes). The last two were kept as they are by group decision.
 - **Division size:** saved as a whole number.
+- **More inputs for (a)** (end of notebook 02): `avg3_pts_vs_avg` (average of the last 3 seasons; one good season can be luck), `roster_change_vs_avg` (last-season points of players who arrived minus those who left, vs an average team) and `new_coach` (1 if the season's first coach is not last season's last coach; allowed for (a) because it is known before the season, never an input for (b) because it is the answer).
 
 ### Data quality
 
@@ -100,6 +101,32 @@ Versions are chosen fairly with a **practice test** (`pick_with_practice_test` i
 - The first-try forest overfitted (0.57 on the seasons it learned from vs 1.07 on new ones). Less detailed trees close that gap (1.02 vs 1.07) but still do not beat the simple guess, and the chosen setting changes from season to season: no forest setting is clearly better.
 - Fewer features did better: several features overlap (last points vs last rank −0.84, last goals conceded vs roster goalies 0.85).
 
+### Task (a): new inputs
+
+The practice test chose, before each test season, between the 3-feature linear model alone, plus one new input, or plus all three.
+
+- Result: **0.985 positions off**, the first result below 1. Better than the simple guess in 6 seasons, equal in 2, worse in 1. Wilcoxon p = 0.08: closer, but still not proven.
+- Chosen: + new coach (5 seasons), + 3-season average (3), nothing added (1). Roster change was never chosen (Spearman with the position: −0.04).
+- This 0.985 is fragile: with a fixed set of 5 inputs (3 features + 3-season average + new coach) the linear model scores 1.04, so the gain came from switching inputs between seasons.
+
+### Task (a): more model types
+
+All with the 5 inputs above and settings chosen by the practice test (`notebooks/03_modeling.ipynb`, "More model types").
+
+| Model | Test error | Better / equal / worse than simple guess | Wilcoxon p | Training error | Setting chosen most |
+|---|---|---|---|---|---|
+| Linear, 5 inputs | 1.04 | 5 / 1 / 3 | 0.60 | 1.05 | — |
+| Simple guess | 1.07 | | | | |
+| k-nearest neighbours (inputs rescaled) | 1.07 | 5 / 2 / 2 | 0.47 | 1.05 | k = 25 |
+| Gradient boosting | 1.07 | 4 / 2 / 3 | 0.83 | 0.84 | 50 trees, depth 3 |
+| Decision tree | 1.14 | 3 / 0 / 6 | 0.32 | 1.01 | depth 4, 30 teams per leaf |
+
+- No model type beats the linear one, and none is proven better than the simple guess.
+- Gradient boosting still memorises part of the training seasons (0.84 vs 1.07).
+- **Decision tree** (`figures/decision_tree_a.png`, white-box): first split on last season's points (1.09 of the average), then the 3-season average and the goalies. Strong last season and over 3 seasons → highest (0.27–0.39); weak with leaky goalies → lowest (0.91).
+- **Feature importance** (`figures/feature_importance_a.png`, scrambling each input in the test seasons): last season's points +0.22 positions off, 3-season average +0.09, roster goalies +0.03, roster players +0.02, new coach −0.02 (no help).
+- Overall finding for (a): last season's points first, the 3-season average second, everything else close to nothing; the limit is the information available before the season.
+
 ### Task (b)
 
 Not started: needs the coach table (coach change yes/no and coach information). Simple guess planned: new coach if the team missed the playoffs last season.
@@ -113,9 +140,12 @@ Not started: needs the coach table (coach change yes/no and coach information). 
 
 ## Checkpoint (6 November)
 
-- Business understanding, data understanding and data preparation done for task (a); the final team table has 753 rows and no empty values.
-- First answer for (a): about 1 position off on average (best model 1.02, simple guess 1.07, random 1.55); no model proven better than the simple guess yet.
-- Task (b) not started (coach table missing).
+1. **Goal:** predict, before the season, the division position (a) and coach change (b).
+2. **Data:** NHL 1979–2009 (753 team-seasons), stats compared to the season average.
+3. **Quality:** keys, joins, missing values, rules and outliers checked; only the 13 new teams had missing values, filled from earlier new clubs.
+4. **Testing:** season by season (2000–2009), each season predicted only from earlier ones.
+5. **Result (a):** random 1.55, simple guess 1.07, linear model 1.02 (0.985 when the inputs are chosen per season, 1.04 with them fixed). 4 model types tried (linear, tree, k-nearest neighbours, gradient boosting, plus random forest): none proven better than the simple guess. Last season's points matter most, then the 3-season average: last season already says most of what is known before the season.
+6. **Missing:** task (b) not started (coach table); feature selection for (a) (Person 3).
 
 ## Tables
 

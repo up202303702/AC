@@ -8,7 +8,10 @@ Move a task to the right section when its status changes. Owner in brackets.
 - [Person 2] Plot: last season's results, kept vs changed coach (with test), with finding
 - [Person 2] Coach table (new coach yes/no + coach info), joined to `data/team_table.csv`
 - [Person 2] Simple guess for (b): new coach if the team missed the playoffs, scored with the test loop
-- [Person 2] First model for (b)
+- [Person 2] First models for (b): logistic regression and decision tree, with class weights; recall, precision, AUC
+- [Person 3] Feature selection for (a): filter (correlation, drop overlapping) and wrapper (add/remove one at a time, practice test)
+- [Person 3] Quality checks on the coach columns
+- [Person 3] For (b): compare SMOTE vs class weights, applied to training seasons only
 - [Group] Agree on the coach cases with Person 2: interim coaches, co-coaches (DET 1998), empty games (OTT 2001) (`docs/project_notes.md`, "Missing and odd values", case 5)
 - [Group] Task (c), once announced
 
@@ -18,6 +21,9 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## Done
 
+- [Person 1] New inputs for (a): 3-season average, roster change, new coach
+- [Person 1] More model types for (a): decision tree, k-nearest neighbours, gradient boosting (practice test)
+- [Person 1] Feature importance and decision tree figure for (a)
 - [Person 1] First model for (a)
 - [Person 3] Plots: missing values map, goals scored vs conceded, correlations, with findings
 - [Person 3] 6 data quality checks (chapter 4 / Lab 2: keys, joins, missing, redundant, inconsistent, outliers)
