@@ -4,7 +4,6 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## To do
 
-- [Person 1] First model for (a)
 - [Person 2] Plot: coach changes per season, with finding
 - [Person 2] Plot: last season's results, kept vs changed coach (with test), with finding
 - [Person 2] Coach table (new coach yes/no + coach info), joined to `data/team_table.csv`
@@ -19,6 +18,7 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 ## Done
 
+- [Person 1] First model for (a)
 - [Person 3] Plots: missing values map, goals scored vs conceded, correlations, with findings
 - [Person 3] 6 data quality checks (chapter 4 / Lab 2: keys, joins, missing, redundant, inconsistent, outliers)
 - [Person 3] List of missing and odd values, with a proposed decision for each

@@ -9,7 +9,7 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 1. **Business understanding:** done (Task (a) and Task (b) below).
 2. **Data understanding:** table descriptions done; plots and findings in progress.
 3. **Data preparation:** team table, roster information, data quality checks and new teams done; coach table and the coach cases in progress.
-4. **Modeling:** started. Season-by-season test loop and the simple guess for (a) done; first models before the checkpoint.
+4. **Modeling:** started. Test loop, simple guesses and first models for (a) done (see Modeling below); (b) waits for the coach table.
 5. **Evaluation:** after the checkpoint.
 6. **Deployment:** final predictions and presentation.
 
@@ -76,6 +76,45 @@ Checked in `notebooks/02_data_preparation.ipynb` with the problems from chapter 
 | 6 | Ex-WHA clubs in 1979: roster from WHA stats | 4 | Keep as it is (outside the test seasons) | Decided: limit for the slides |
 | 7 | `div_size` as a decimal number | all | Whole number | Applied |
 | 8 | Roster = players who played during the season | all | Keep; do not use roster size or number of rookies (they depend on how the season goes) | Limit for the slides |
+
+## Modeling
+
+All results use the season-by-season test loop (`src/evaluation.py`): each season from 2000 to 2009 (no 2004) is predicted using only the seasons before it, and the score is the average over the 9 seasons. Code in `notebooks/03_modeling.ipynb`.
+
+### Task (a): first models
+
+Each model learns a team's relative position in its division (`rank / div_size`, so 1st of 5 and 1st of 7 are comparable) and its prediction is turned back into positions inside each division.
+
+| Guess or model | Features | Average positions off |
+|---|---|---|
+| Random order | none | 1.55 |
+| Simple guess: same order as last season | last season's points | 1.07 |
+| Linear regression | all 9 | 1.07 |
+| Random forest (300 trees, at least 5 teams per leaf) | all 9 | 1.07 |
+| **Linear regression** | **last season's points, roster players, roster goalies** | **1.02** |
+
+- All models beat random order clearly, but beat the simple guess only slightly: last season's results already carry most of what can be known before the season.
+- The 0.05 gap between the best model and the simple guess comes from 9 seasons only; it is not yet shown to be more than luck (some seasons, e.g. 2006, are worse with the model).
+- Fewer features did better: several features overlap (last points vs last rank −0.84, last goals conceded vs roster goalies 0.85), and with about 600 training rows extra overlapping features add noise.
+- The random forest does not beat the linear model: the relations are close to straight lines and the data is small, so a flexible model has little extra to find.
+
+### Task (b)
+
+Not started: needs the coach table (coach change yes/no and coach information). Simple guess planned: new coach if the team missed the playoffs last season.
+
+### Next steps
+
+- Task (b): coach table, simple guess, first model.
+- More model types and a systematic choice of their settings (only on training seasons).
+- Feature selection (filter and wrapper), starting from the overlapping pairs.
+- A significance test between models over the 9 seasons (e.g. Wilcoxon), and a check of overfitting (training vs test error).
+- Task (c), once announced.
+
+## Checkpoint (6 November)
+
+- Business understanding, data understanding and data preparation done for task (a); the final team table has 753 rows and no empty values.
+- First answer for (a): about 1 position off on average (best model 1.02, simple guess 1.07, random 1.55).
+- Task (b) not started (coach table missing).
 
 ## Tables
 
