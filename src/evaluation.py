@@ -43,3 +43,24 @@ def division_rank(test, strength):
 def mean_rank_error(test, predicted_rank):
     """On average, how many positions off the predicted rank is (0 = perfect)."""
     return (test["rank"] - pd.Series(list(predicted_rank), index=test.index)).abs().mean()
+
+
+# ---------- Choosing settings fairly ----------
+
+def pick_with_practice_test(train, candidates, score, n_practice=3, lower_is_better=True):
+    """Choose one of several candidate predict functions using only the training seasons.
+
+    candidates = {"name": predict(train, test), ...}
+    The last `n_practice` training seasons become a practice test: each candidate learns from
+    the seasons before them, predicts them, and gets the average score. Returns the name of the
+    best candidate and all practice scores. The real test season is never looked at.
+    """
+    seasons = sorted(train["year"].unique())
+    practice = seasons[-n_practice:]
+    inner = train[train["year"] < practice[0]]
+    results = {}
+    for name, predict in candidates.items():
+        scores = [score(train[train["year"] == s], predict(inner, train[train["year"] == s])) for s in practice]
+        results[name] = sum(scores) / len(scores)
+    best = min(results, key=results.get) if lower_is_better else max(results, key=results.get)
+    return best, results

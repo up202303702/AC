@@ -83,20 +83,22 @@ All results use the season-by-season test loop (`src/evaluation.py`): each seaso
 
 ### Task (a): first models
 
-Each model learns a team's relative position in its division (`rank / div_size`, so 1st of 5 and 1st of 7 are comparable) and its prediction is turned back into positions inside each division.
+Each model learns a team's relative position in its division (`rank / div_size`, so 1st of 5 and 1st of 7 are comparable) and its prediction is turned back into positions inside each division. Plain-language explanation: `docs/modeling_explained.md`.
 
-| Guess or model | Features | Average positions off |
-|---|---|---|
-| Random order | none | 1.55 |
-| Simple guess: same order as last season | last season's points | 1.07 |
-| Linear regression | all 9 | 1.07 |
-| Random forest (300 trees, at least 5 teams per leaf) | all 9 | 1.07 |
-| **Linear regression** | **last season's points, roster players, roster goalies** | **1.02** |
+Versions are chosen fairly with a **practice test** (`pick_with_practice_test` in `src/evaluation.py`): inside the training seasons only, the last 3 are used to choose between versions; the real test season is never looked at.
 
-- All models beat random order clearly, but beat the simple guess only slightly: last season's results already carry most of what can be known before the season.
-- The 0.05 gap between the best model and the simple guess comes from 9 seasons only; it is not yet shown to be more than luck (some seasons, e.g. 2006, are worse with the model).
-- Fewer features did better: several features overlap (last points vs last rank −0.84, last goals conceded vs roster goalies 0.85), and with about 600 training rows extra overlapping features add noise.
-- The random forest does not beat the linear model: the relations are close to straight lines and the data is small, so a flexible model has little extra to find.
+| Guess or model | Positions off (test) | Training error | Better / equal / worse than simple guess | Wilcoxon p |
+|---|---|---|---|---|
+| Random order | 1.55 | | | |
+| Simple guess: same order as last season | 1.07 | | | |
+| **Linear regression, chosen fairly** (chose 3 features in all 9 seasons: last points, roster players, roster goalies) | **1.02** | 1.08 | 5 / 3 / 1 | 0.16 |
+| Random forest, chosen fairly (tree detail chosen per season; most often at least 20 teams per leaf, depth 3) | 1.07 | 1.02 | 5 / 1 / 3 | 0.98 |
+| First try: random forest, 5 teams per leaf, unlimited depth | 1.07 | **0.57** | | |
+
+- All models beat random order clearly, but none is proven better than the simple guess (all p-values above 0.05): last season's results already carry most of what can be known before the season, and 9 test seasons are too few to prove a gap of about 0.05 positions.
+- The linear model with 3 features is the best and the fair choice picks it every season, so 1.02 is not an optimistic number.
+- The first-try forest overfitted (0.57 on the seasons it learned from vs 1.07 on new ones). Less detailed trees close that gap (1.02 vs 1.07) but still do not beat the simple guess, and the chosen setting changes from season to season: no forest setting is clearly better.
+- Fewer features did better: several features overlap (last points vs last rank −0.84, last goals conceded vs roster goalies 0.85).
 
 ### Task (b)
 
@@ -105,15 +107,14 @@ Not started: needs the coach table (coach change yes/no and coach information). 
 ### Next steps
 
 - Task (b): coach table, simple guess, first model.
-- More model types and a systematic choice of their settings (only on training seasons).
+- More model types (a single decision tree to show on a slide, k-nearest neighbours, gradient boosting), chosen with the practice test.
 - Feature selection (filter and wrapper), starting from the overlapping pairs.
-- A significance test between models over the 9 seasons (e.g. Wilcoxon), and a check of overfitting (training vs test error).
 - Task (c), once announced.
 
 ## Checkpoint (6 November)
 
 - Business understanding, data understanding and data preparation done for task (a); the final team table has 753 rows and no empty values.
-- First answer for (a): about 1 position off on average (best model 1.02, simple guess 1.07, random 1.55).
+- First answer for (a): about 1 position off on average (best model 1.02, simple guess 1.07, random 1.55); no model proven better than the simple guess yet.
 - Task (b) not started (coach table missing).
 
 ## Tables
