@@ -44,6 +44,23 @@ def mean_rank_error(test, predicted_rank):
     """On average, how many positions off the predicted rank is (0 = perfect)."""
     return (test["rank"] - pd.Series(list(predicted_rank), index=test.index)).abs().mean()
 
+# ---------- Task (b): coach changes ----------
+from sklearn.metrics import roc_auc_score
+import numpy as np
+
+def coach_auc(test, probabilities):
+    actual = pd.to_numeric(test["coach_change"], errors="coerce")
+    valid = actual.notna()
+
+    actual = actual[valid].astype(int)
+    probabilities = pd.Series(
+        probabilities, index=test.index
+    )[valid]
+
+    if actual.nunique() < 2:
+        return np.nan
+
+    return roc_auc_score(actual, probabilities)
 
 # ---------- Choosing settings fairly ----------
 
