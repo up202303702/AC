@@ -1,9 +1,11 @@
-"""Season-by-season testing, shared by task (a) and task (b).
+"""Season-by-season testing, shared by tasks (a), (b) and (c).
 
 For each test season we pretend to be the day before it starts:
 the model may only learn from the seasons before it, then predicts that season.
 """
+import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_auc_score
 
 
 def test_seasons(table, n=9):
@@ -41,14 +43,60 @@ def division_rank(test, strength):
 
 
 def mean_rank_error(test, predicted_rank):
-    """On average, how many positions off the predicted rank is (0 = perfect)."""
+    """On average, how many positions off the predicted division rank is (0 = perfect)."""
     return (test["rank"] - pd.Series(list(predicted_rank), index=test.index)).abs().mean()
 
+
+def division_winner_places(year):
+    """How many top places in each conference go to division winners (NHL rules):
+    1979-1992: none (conference order is by points only)
+    1993-1997: 2 (the 2 division winners are 1st and 2nd)
+    1998-2009: 3 (the 3 division winners are 1st, 2nd and 3rd)"""
+    if year < 1993:
+        return 0
+    return 2 if year < 1998 else 3
+
+
+def conference_rank(test, strength):
+    """Turn any 'how strong is this team' number into a position 1, 2, 3... inside each conference,
+    following the NHL rules: division winners first (see division_winner_places), then the
+    other teams. Higher strength = better position. Teams with no value go last.
+
+    For the real ranking, use strength = points, with wins and goal difference as tie-breakers
+    (see true_strength). For a prediction, use the predicted points."""
+    s = pd.Series(list(strength), index=test.index).fillna(-np.inf)
+    ranks = pd.Series(np.nan, index=test.index)
+    for (year, conf), g in test.groupby(["year", "confID"]):
+        strength_g = s.loc[g.index].sort_values(ascending=False, kind="stable")
+        winners = []
+        if division_winner_places(year) > 0:
+            # the strongest team of each division
+            best_per_div = g.loc[strength_g.index].groupby("divID", sort=False).head(1).index
+            winners = list(strength_g.loc[best_per_div].sort_values(ascending=False, kind="stable").index)
+        others = [i for i in strength_g.index if i not in winners]
+        order = winners + others
+        ranks.loc[order] = range(1, len(order) + 1)
+    return ranks
+
+
+def true_strength(teams):
+    """Real end-of-season strength: points first, then wins, then goal difference.
+    Reproduces 99.5% of the division ranks in Teams.csv 1979-2009 (the rest were
+    head-to-head tie-breaks, which we cannot compute)."""
+    return teams["Pts"] + teams["W"] / 1e3 + (teams["GF"] - teams["GA"]) / 1e6
+
+
+def mean_conference_rank_error(test, predicted_rank):
+    """On average, how many positions off the predicted conference rank is (0 = perfect).
+    Needs the real conference rank in column `conf_rank`."""
+    return (test["conf_rank"] - pd.Series(list(predicted_rank), index=test.index)).abs().mean()
+
+
 # ---------- Task (b): coach changes ----------
-from sklearn.metrics import roc_auc_score
-import numpy as np
 
 def coach_auc(test, probabilities):
+    """AUC of the predicted chance of a coach change (0.5 = coin flip, 1 = perfect).
+    Teams without an answer (new teams) are left out."""
     actual = pd.to_numeric(test["coach_change"], errors="coerce")
     valid = actual.notna()
 
@@ -61,6 +109,14 @@ def coach_auc(test, probabilities):
         return np.nan
 
     return roc_auc_score(actual, probabilities)
+
+
+# ---------- Task (c): penalty minutes ----------
+
+def pim_mae(test, predictions):
+    """On average, how many penalty minutes off the prediction is (0 = perfect)."""
+    return (test["PIM"] - pd.Series(list(predictions), index=test.index)).abs().mean()
+
 
 # ---------- Choosing settings fairly ----------
 
