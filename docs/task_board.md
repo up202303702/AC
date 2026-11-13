@@ -20,10 +20,7 @@ Move a task to the right section when its status changes. Owner in brackets.
 
 TODO: plot conclusions
 
-- [Person 2] Simple guess for (b): new coach if the team missed the playoffs, scored with the test loop
-
-## Done
-
+- Done
 - [Person 1] New inputs for (a): 3-season average, roster change, new coach
 - [Person 1] More model types for (a): decision tree, k-nearest neighbours, gradient boosting (practice test)
 - [Person 1] Feature importance and decision tree figure for (a)
@@ -42,3 +39,4 @@ TODO: plot conclusions
 - [Person 1] Season-by-season test loop (train on earlier seasons, predict the next)
 - [Person 1] Simple guess for (a): same position as last season, scored with the test loop
 - [Person 2] Coach table (new coach yes/no + coach info), joined to `data/team_table.csv`
+- [Person 2] Simple guess for (b): new coach if the team missed the playoffs, scored with the test loop
