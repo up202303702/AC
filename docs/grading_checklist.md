@@ -1,6 +1,6 @@
 # Grading checklist
 
-Every row of the course grid, the top level it asks for, where we are, and what is missing. P1/P2/P3 = Person 1/2/3. Update the "Now" column when something is done. Tasks and dates: `docs/task_board.md`.
+Every row of the course grid, the top level it asks for, where we are, and what is missing. The reason behind each decision, row by row: `docs/decisions.md`. P1/P2/P3 = Person 1/2/3. Update the "Now" column when something is done. Tasks and dates: `docs/task_board.md`.
 
 Status: ✅ at top level · 🟡 partly · ❌ missing
 
@@ -21,7 +21,7 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Interpretation of statistical results | Generally correct | 🟡 | One finding sentence under every result | All |
 | Knowledge extraction (statistics) | Interesting, novel and non-trivial | 🟡 "Below its usual level" predicts a coach change; playoff wins protect the coach | Same for (c): e.g. the 2005 rule change cut penalties per game; how stable PIM is from season to season | P2 |
 | Diversity of plots | Rich and justified set | 🟡 | List each plot with why it was chosen | All |
-| Complexity of plots | Integrated 3+D plots with clear results | 🟡 Goals scored vs conceded vs points | Add 3+D plots: PIM vs games vs points coloured by position; coach change vs last season vs 3-season average coloured by outcome | P2 |
+| Complexity of plots | Integrated 3+D plots with clear results | 🟡 Goals scored vs conceded vs points; team styles (goals for, against, penalties, cluster: `team_styles.png`) | Add 3+D plots: PIM vs games vs points coloured by position; coach change vs last season vs 3-season average coloured by outcome | P2 |
 | Presentation (DU) | Well structured | 🟡 | Notebook 01 in sections: teams, coaches, players; same structure in the slides | P2 |
 | Interpretation of plots | Generally correct | 🟡 | One finding sentence under every plot | All |
 | Visual knowledge extraction | Interesting, novel and non-trivial | 🟡 | See "knowledge extraction" above | P2 |
@@ -47,14 +47,14 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
 | Diversity of tasks | Classification AND regression | ✅ (b) classification; (a), (c) regression | — | — |
-| Diversity of algorithms | 4+ with very different biases | 🟡 (a) 5 types, (c) 4 types; (b) only logistic in the notebook | (b): decision tree, kNN, random forest or boosting, naive Bayes; a small neural network on one task | P2 |
+| Diversity of algorithms | 4+ with very different biases | 🟡 (a) linear, tree, kNN, boosting, forest, pairwise logistic, voting ensemble; (c) linear, tree, kNN, boosting, two-step, stacking (notebook 06); (b) only logistic in the notebook | (b): decision tree, kNN, random forest or boosting, naive Bayes; a small neural network on one task | P2 |
 | Parameter tuning | Systematic | ✅ Practice test over a grid for (a), (b) input sets and cut-off, (c) | List the grids on a slide | — |
 | Understanding algorithm behaviour | Majority of algorithms, including the effect of parameters | ✅ Tree-depth curves (notebook 05); explanations of why boosting with absolute error wins (c), why trees fail with ~30 teams (a), why log helps boosting but hurts linear | One line per algorithm on a slide | P1 |
 | Training vs test | Correct split, multiple splits | ✅ 9 test seasons, train only on earlier ones | — | — |
 | Other factors (time) | Correctly taken into account | ✅ Only data known before the season; 2005 follows 2003 | Checked: all inputs of (b) and (c) come from earlier seasons or the starting roster | — |
 | Performance measure | Aligned with DM goals AND data characteristics | ✅ Reasons in the goals table (`docs/project_notes.md`) | — | — |
 | Interpretation of measures | Advanced (e.g. AUC) | ✅ AUC in (b) | — | — |
-| Baseline | Suitable | ✅ (a) random, last season; (b) never changes, missed playoffs; (c) median, position, last season, Marcel, ceiling | — | — |
+| Baseline | Suitable | ✅ Several levels per task, including hockey rules with no learning: (a) random, last season, 3 seasons, goal difference, Pythagorean, roster; (b) never changes, random, missed playoffs, below usual level, coach playoff win %, mid-season change; (c) median, position, last season, Marcel, ceiling | — | — |
 | Analysis of results | Tests for statistical significance | ✅ Wilcoxon for (a), (b), (c) | — | — |
 | Overfitting | Correctly estimated and analysed | ✅ (a), (b), (c), plus depth curves | New (b) models (P2) | P2 |
 | Model improvement | Guided by performance goals | ✅ `docs/experiment_log.md`: goal, attempt, result, decision | Keep adding new attempts | All |

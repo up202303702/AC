@@ -1,0 +1,72 @@
+# Decisions and reasons
+
+Every important choice in the project: what we decided, what else we could have done, **why**, where the evidence is, and which row of the grading grid it serves (`docs/grading_checklist.md`). Results are in `docs/project_notes.md`; attempts in order are in `docs/experiment_log.md`.
+
+Ordered by CRISP-DM phase. **Planned** = decided, not built yet (left: M14, Person 2).
+
+## 1. Business understanding
+
+| # | Decision | Alternatives | Why | Evidence | Grid row |
+|---|---|---|---|---|---|
+| BU1 | Every prediction is made **the day before the season**, with only data known then | Use any data, including the season itself | That is when a club, sponsor or bettor needs the answer; anything later is cheating (leakage) | Professor's answers; test loop in `src/evaluation.py` | BU: requirements; other factors (time) |
+| BU2 | (a) is ranked **per conference**, with the NHL rules (division winners first) | Rank per division (our first version); rank the whole league | Professor's clarification (13 Nov); it is also how the NHL really seeds teams | `conference_rank`; reproduces 99.5% of real ranks (notebook 03) | BU: requirements, business → DM goals |
+| BU3 | (b): **missing a real coach change is worse than a false alarm** | Treat both errors the same | A club, journalist or bettor who is told "no change" and is wrong loses more than one who checks a false alarm | Group decision, BU notes | BU: business goals; performance measure |
+| BU4 | (c): the player's team is known, his **games played this season are not** | Assume games are known | The roster is published before the season; injuries and demotions happen during it | Ceiling test: 14.0 with real games vs 16.5 without (notebook 04) | BU: requirements |
+| BU5 | Each task gets one data mining task type: (a) regression of points, (b) binary classification, (c) regression of minutes | (a) as classification of rank; (c) as classification into PIM bands | Points and minutes are numbers with an order; coach change is yes/no | Goals table, `docs/project_notes.md` | BU: business → DM goals; diversity of tasks |
+
+## 2. Data understanding
+
+| # | Decision | Alternatives | Why | Evidence | Grid row |
+|---|---|---|---|---|---|
+| DU1 | Describe **all 22 tables**, then keep the ones that serve a task | Only look at the obvious tables | We cannot know what is useful before looking; e.g. `Coaches` notes revealed interim and co-coaches | Notebook 01, table list in `docs/project_notes.md` | DU: diversity, presentation |
+| DU2 | **Spearman** correlation (order), not Pearson (straight line) | Pearson | PIM, points and ranks are skewed or are positions; Spearman only assumes "more goes with more" | Notebook 01, notebook 04 section 3 | DU: diversity / interpretation of statistical methods |
+| DU3 | Plot values **over time** before using them | Treat all seasons as alike | Goals per game, points per game and penalties per game changed by era, so raw values are not comparable | `goals_per_game.png`; PIM by era 1.26 → 0.73 per game (notebook 04) | DU: knowledge extraction |
+| DU4 | Check the **coach-change rate by era** | One rate for all years | Rates differ (about 15% in 1943–67, 30% in 1968–92, 23% in 1993–2009), so the training years matter | `coach_changes.png` | DU: knowledge extraction |
+
+## 3. Data preparation
+
+| # | Decision | Alternatives | Why | Evidence | Grid row |
+|---|---|---|---|---|---|
+| DP1 | **NHL only, 1979–2009** | All leagues and years from 1909; start in 1968 | From 1979 the NHL is the only league; older seasons have other leagues, rules and playoff formats. Agreed with the professor | Learning curves: (a) flat with 1 season, (c) flat after ~10, and every test season has ≥ 21 (notebook 05) | DP: sampling, domain-specific |
+| DP2 | Follow clubs with **`franchID`**, not `tmID` | `tmID` | Teams move city and change code; the club and its history stay | Notebook 02 | DP: data integration (matching entities) |
+| DP3 | Values **per game** and **vs the season average** | Raw totals | Season lengths changed (48 games in 1994); scoring and the points system changed (1999, 2005) | Notebook 02; DU3 | DP: integration (conversion), transformation |
+| DP4 | **2005 follows 2003** | Treat 2005 as having no last season | 2004 was cancelled (lockout); 2003 is the most recent information a club had | Simple guess error in 2005 (1.13) close to the average (notebook 02 notes) | DP: other factors (time) |
+| DP5 | New teams filled with the **average first season of earlier new clubs** | League average; drop them; leave empty | New teams finish low (all 13 in the bottom half, 8 last), so the league average would be wrong; only earlier clubs are used, so no future data | `missing_teams.png`, notebook 02 | DP: missing data |
+| DP6 | Coaches: rows with `notes` (interim, co-coaches) **dropped** for first/last coach; split spells of the same coach **summed** | Count every row as a coach | An interim coach is not "the coach who finished the season"; one coach with two spells (OTT 2001) is still one coach | Notebook 02, cases list in `docs/project_notes.md` | DP: consistency; missing data |
+| DP7 | (c): a player's stints in one season are **summed** | One row per stint | We predict his season total, whatever team he ends on | Notebook 04 section 1 | DP: integration |
+| DP8 | (c): players with no NHL history get the **median of first-season players of their position**, from training seasons only | 0; overall median. **Planned (Person 3):** regression on age, height, weight (`Master.csv`) | First-season players are 16%; defencemen and goalies differ a lot; training seasons only, so no future data | Notebook 04 section 4 | DP: missing data |
+| DP9 | Missing fills computed **only from seasons before the test seasons** | Fill from all data | Using test seasons to fill training values leaks future data (found and fixed on 20 Nov) | Notebook 03, notebook 05 | Performance estimation: training vs test (no leakage) |
+| DP10 | **Engineered inputs from hockey knowledge**: 3-season average, "below usual level", goal difference, Pythagorean expectation, coach playoff win %, Marcel rate, career rate, team style | Only the raw columns | Each answers a hockey question: one season can be luck; clubs fire coaches when a team falls below what it expects; goals say more than points; few games are unreliable | Notebooks 02–04 | DP: feature engineering (methods AND knowledge) |
+| DP11 | **Log of PIM tested, not kept** | Always log a skewed target | It helps a flexible model (17.8 → 17.1) but hurts a straight line (17.6 → 18.7); training on absolute error solves the same problem directly | Notebook 04 section 8 | DP: transformation |
+| DP12 | **Scaling inside the model pipeline** (StandardScaler) for k-nearest neighbours and logistic regression | Scale the whole table once | Distances and weights depend on scale; fitting the scaler on all data would leak test information | Notebooks 03, 04 | DP: transformation; training vs test |
+
+## 4. Modeling
+
+| # | Decision | Alternatives | Why | Evidence | Grid row |
+|---|---|---|---|---|---|
+| M1 | **Season-by-season test**: train on all earlier seasons, predict the next, 9 times (2000–2009) | Random train/test split; k-fold cross-validation | Seasons are in time order: a random split would let the model learn from the future. 9 splits give 9 scores, enough for a significance test | `evaluate_by_season` | Training vs test (multiple splits); other factors (time) |
+| M2 | **Practice test** chooses settings and input sets: the last 3 training seasons | Choose the best on the test seasons | Choosing on the test makes results look better than they are; the test season must never influence a decision | `pick_with_practice_test` | Parameter tuning (systematic) |
+| M3 | (a): **predict points, then apply the NHL rules** | Predict the position directly | The ranking rules are fixed facts; points are comparable across conferences of 10–15 teams, positions are not | Notebook 03, conference section | BU → DM; understanding behaviour |
+| M4 | **Model types with different ways of learning**: linear (weighted sum), decision tree (yes/no questions), k-nearest neighbours (copy similar cases), gradient boosting (many small trees), logistic regression (chance of yes) | One model type | Different "biases": if all agree, the limit is the data, not the model | Notebooks 03, 04 | Diversity of algorithms |
+| M5 | **Tree depth limited** (chosen by the practice test) | Unlimited trees | Deep trees memorise: (a) depth 12 is 1.3 positions off on training vs 3.9 on test | `tree_depth_curves.png` | Overfitting; understanding parameters |
+| M6 | (b): **class weights** ("balanced") | No weighting; SMOTE (**planned**, Person 3) | Only 26% are changes; without weights the model learns to say "no" | Notebook 03 | Imbalanced data |
+| M7 | (b): **cut-off chosen by the practice test, recall counted double** (F2) | Cut-off 0.5 | BU3: missing a change is worse; result: 90% of changes caught, at the cost of many false alarms (precision 26%) | Notebook 03 | Performance measure aligned with goals |
+| M8 | (c): gradient boosting trained on **absolute error** | Squared error (the default) | We score with MAE; squared error chases the few enforcers (200–400 minutes) | Notebook 04 sections 5, 8 | Performance measure aligned with data; model improvement |
+| M9 | (a): **pairwise ranking** with a classifier: "will team A finish above team B?" | Only regression of points | A ranking is about order, not exact points; a classifier on pairs learns order directly (course T03). Result: 3.19, same as regression; its weights read like hockey (3-season average counts most) | Notebook 06, A1 | Diversity of tasks/algorithms; model improvement |
+| M10 | **Ensembles**: voting of linear + kNN + boosting (a); stacking with weights learned on the practice seasons (c) | Single models | Models with different biases make different mistakes; averaging can cancel some (course T05). Result: voting 3.13 (a), not proven; stacking 17.04 (c), worse than boosting alone because its weights were learned on squared error and are unstable | Notebook 06, A2 and C3 | Diversity of algorithms |
+| M11 | (a): **team-style clusters** (k-means on goals for/against, penalties, power play, penalty kill) as an input; k chosen by the practice test. Player types for (c) are Person 2's clustering | Only raw inputs | Teams with the same points may play differently, and styles may last differently (course T07). Scaler and k-means fitted on training seasons only. Result: 3.24, no gain; the groups re-describe strength (`team_styles.png`) | Notebook 06, A3 | DU complexity (3+D); feature engineering |
+| M12 | (c): **rate × games** (two regressions), and a **two-step model** (classifier: any PIM?, then regressor) | One model for the total | Games played is the biggest unknown (BU4) and 12% get 0: splitting the problem makes each part simpler and explainable (T02 + T03). Result: rate × games 17.57, but it located the error (games 15.7 off; rate × real games 12.0); two-step 16.90 | Notebook 06, C1 and C2 | Model improvement; understanding behaviour |
+| M13 | **Recent seasons count more** (weight decay^years ago; decay chosen by the practice test), for (a) and (c) | All seasons equal | The game changes over time (DU3); the idea of data streams / online learning. Result: the practice test mostly chose "all equal"; old seasons do not hurt because values are already compared with their season's average | Notebook 06, A4 and C4 | Other factors (time) |
+| M14 | **Planned (b): association rules** (Person 2) | Only classifiers | Rules like "missed playoffs AND below usual → new coach" with support and confidence are directly readable (course T08) | — | White-box; knowledge extraction |
+
+## 5. Evaluation
+
+| # | Decision | Alternatives | Why | Evidence | Grid row |
+|---|---|---|---|---|---|
+| E1 | Measures: (a) average **positions off**; (b) **AUC** + recall/precision; (c) **MAE** in minutes + Spearman | Accuracy for (b); squared error for (c) | (a) easy to read; (b) only 26% change, so "never changes" is already 74% accurate, AUC is not fooled; (c) skewed, MAE is in minutes and not dominated by enforcers | Goals table | Performance measure; interpretation (AUC = advanced) |
+| E2 | **Baselines at several levels**: no information (random, never changes, median), persistence (same as last season), **hockey rules with no learning** (Pythagorean expectation, "below usual level", Marcel), and a ceiling that is not allowed (real games played) | Only one simple guess | A model is only worth something if it beats what a hockey fan could do without data mining. Finding: in (a) and (b) the best hockey rule is as good as our model, so the gain comes from the hockey idea, not the learning | Notebooks 03, 04 | Baseline |
+| E3 | **Wilcoxon signed-rank test** on the 9 paired season scores | t-test; no test | Paired (same seasons), only 9 values, no assumption of a normal distribution | Notebooks 03, 04 | Analysis of results (significance tests) |
+| E4 | **Overfitting**: training error on the last 3 training seasons vs test error | Training error on all training seasons | The 1980s had more goals and penalties, so their errors are bigger and would hide memorising | Notebooks 03, 04 | Overfitting |
+| E5 | **Permutation importance** (scramble one input, measure the loss) | Only model weights | Works for every model type, and measures what the model really uses on new seasons | `feature_importance_*.png` | Feature importance |
+| E6 | **White-box models read in hockey terms**: decision tree drawn (a), logistic weights (b) | Only black-box scores | The grid asks for interpretation related to the domain; e.g. a coach with playoff wins is protected | `decision_tree_a.png`, notebook 03 | White-box models |
+| E7 | **Report non-significant results as they are** | Only show what worked | The professor grades method, not results; (a) is not proven better than the best rule, and saying so is the correct analysis | All notebooks | Analysis of results |

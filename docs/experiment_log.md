@@ -18,6 +18,11 @@ Every modeling attempt, in order: the goal (why we tried it), what we did, the r
 | A10 | Model types again, per conference | Tree, kNN, boosting with practice test | kNN 3.18, boosting 3.20, tree 3.37; no memorising | No model type proven better: the limit is pre-season information |
 | A11 | How much data is needed? | Learning curve: last 1–20 seasons or all | Flat (3.13–3.20) | 1979 start is more than enough for a 3-input linear model |
 | A12 | Show overfitting and the effect of a setting | Tree depth 1–12 | Best depth 3; depth 12: 1.3 training vs 3.9 test | Shallow trees only |
+| A14 | Learn the order directly, not points (T03) | Pairwise ranking: logistic regression on team differences, "A above B?" | 3.19 (3 or 5 inputs); weights: 3-season average 0.48, last points 0.39, goal difference 0.24 | Same as regression: kept as an alternative view, not as the final model |
+| A15 | Cancel different models' mistakes (T05) | Voting: average of linear, kNN, boosting | 3.13, better than the rule in 5/9, p = 0.57 | Lowest number, not proven: the models make mostly the same mistakes |
+| A16 | Use playing style, not only strength (T07) | K-means team styles (k by practice test) as input | 3.24; groups re-describe strength (`team_styles.png`) | Not kept as input; the groups are kept as a data understanding finding |
+| A17 | Adapt to the changing game (data streams idea) | Recent seasons weighted, decay by practice test | 3.20; "all seasons equal" chosen in 6/9 | Not kept: old seasons do not hurt once values are vs the season average |
+| A13 | Checkpoint feedback: more interesting baselines | Hockey rules with no learning: Pythagorean expectation, goal difference, 3-season average, roster strength | Pythagorean 3.16 = best model (p = 0.82); roster alone 4.06 | The model adds nothing beyond the hockey idea; Pythagorean becomes the real baseline |
 
 ## Task (b): coach change
 
@@ -31,6 +36,7 @@ Every modeling attempt, in order: the goal (why we tried it), what we did, the r
 | B6 | Choose fairly between sets | Practice test chooses the set before each season | 0.68, 8/9, p = 0.012 | Final (b) model |
 | B7 | Do more flexible models help? | Random forest and gradient boosting on the "split win%" set | 0.645 (8/9), 0.640 (6/9) | Logistic stays; more flexibility does not help with ~700 team-seasons. Quick test outside the notebooks: Person 2 adds these models to notebook 03 |
 | B8 | Catch more real changes (missing one is worse) | Cut-off chosen by the practice test with recall counted double (F2) | Recall 90% (simple guess 56%), precision 26%, says "yes" for 75% | Matches the business goal; trade-off stated |
+| B10 | Checkpoint feedback: more interesting baselines | One-line rules with no learning: never changes, random, weak last season, below usual level, coach playoff win %, changed coach mid-season | Missed playoffs 0.563 ≈ random 0.557; below usual level 0.687 = final model (p = 0.84) | The gain is the hockey idea; "below usual level" becomes the real baseline |
 | B9 | Check memorising and what matters | Training vs test AUC; permutation importance | 0.69 vs 0.67; below usual level −0.12 AUC when scrambled, then coaches last season, coach playoff win % | No overfitting; interpretation fits hockey |
 
 ## Task (c): penalty minutes
@@ -43,4 +49,8 @@ Every modeling attempt, in order: the goal (why we tried it), what we did, the r
 | C4 | Check memorising and what matters | Training MAE on 2006–08; permutation importance | 15.4 vs 16.5 test: small gap; last season's PIM, then career rate | No overfitting |
 | C5 | Deal with the skewed target in another way | Learn log(1 + PIM) with squared-error models | Boosting 17.8 → 17.1; linear 17.6 → 18.7 | Log helps flexible models, hurts linear; keep absolute error |
 | C6 | How much data is needed? | Learning curve: last 1–20 seasons or all | 17.4 with 1 season, 16.6 with 10, flat after | Boosting needs about 10 seasons; 1979 start is enough |
+| C8 | Split the total into parts (T02) | Rate × games: one model for PIM per game, one for games played | 17.57; games model 15.7 games off; rate × real games 12.0 | Not kept, but it located the error: games played |
+| C9 | Treat the 12% zeros separately (T03 + T02) | Two-step: classifier "any PIM?", then regressor | 16.90, better than Marcel (p = 0.008), worse than boosting (p = 0.008) | Not kept: wrong "0" answers cost a whole season |
+| C10 | Learn how much to trust each model (T05) | Stacking: non-negative weights learned on the practice seasons | 17.04, worse than boosting in 9/9; weights unstable (linear 0.03–0.57) | Not kept: weights learned on squared error favour the linear model |
+| C11 | Adapt to the changing game | Boosting with recent seasons weighted, decay by practice test | 16.56 (p = 0.16 vs boosting); "all equal" chosen in 6/9 | Not kept: no gain |
 | C7 | Show overfitting and the effect of a setting | Tree depth 1–16 | Best depth about 6; depth 16: 8.9 training vs 23.9 test | Depth must be limited |

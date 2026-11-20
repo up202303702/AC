@@ -168,6 +168,7 @@ All with the 5 inputs above and settings chosen by the practice test (`notebooks
 | Decision tree (depth 3) | 3.37 | 4 / 1 / 4 | 0.77 | 3.73 |
 
 - Goal difference helps: it shows a team's real strength better than points, which include luck in close games. Not proven (p above 0.05).
+- **Stronger baselines, hockey rules with no learning:** the Pythagorean expectation (GF² / (GF² + GA²) last season) scores **3.16, the same as the best model** (Wilcoxon p = 0.82 between them); goal difference alone 3.19; last 3 seasons 3.49; roster goalies 3.74; roster players' points 4.06. So the model's gain comes from the hockey idea (goal difference), not from the learning. The real baseline for (a) is the Pythagorean expectation.
 - No model type is proven better than the simple guess; same conclusion as for divisions: the limit is what is known before the season.
 
 ### Task (b): coach change
@@ -183,6 +184,7 @@ All with the 5 inputs above and settings chosen by the practice test (`notebooks
 
 - New inputs: `pts_vs_usual` (last season's points minus the 3-season average) and `last_coach_po_win_pct` / `last_coach_reg_win_pct` (the coach's playoff and regular-season win %). Coaches with `notes` dropped and split spells summed, as in notebook 02.
 - Statistically proven better than the simple guess.
+- **Stronger baselines, one-line rules with no learning:** never changes 0.50; random 0.557; missed playoffs 0.563 (barely better than random); coach's playoff win % 0.577; weak last season 0.590; changed coach mid-season last year 0.606; **below its usual level 0.687, the same as the final model** (p = 0.84 between them). So the gain comes from the hockey idea, not from the learning. The real baseline for (b) is the "below its usual level" rule.
 - Weights and importance: below usual level matters most (scrambling it costs 0.12 AUC), then the number of coaches last season and the coach's playoff win %. Clubs replace the coach when the team falls below what it usually achieves; playoff wins protect him.
 - No overfitting: training AUC 0.69, test 0.67.
 - Cut-off chosen by the practice test with recall counted double: catches 90% of real changes (simple guess 56%), but says "yes" for 75% of teams (precision 26%).
@@ -213,7 +215,25 @@ All with the 5 inputs above and settings chosen by the practice test (`notebooks
 - **Learning curves** (train on the last 1, 3, 5, 10, 20 or all seasons; `figures/learning_curves.png`): (a) is flat (a 3-input linear model needs only 1 season); (c) improves until about 10 seasons, then flat. Every test season has at least 21 training seasons, so starting in 1979 is enough.
 - **Tree depth** (`figures/tree_depth_curves.png`): training error keeps falling with depth while test error falls then rises: best depth 3 for (a), about 6 for (c); deep trees memorise (c at depth 16: 8.9 training vs 23.9 test).
 
-Experiment by experiment, with the reason for each: `docs/experiment_log.md`.
+### Approaches from the course methods (`notebooks/06_course_methods.ipynb`)
+
+| Task | Approach (course topic) | Score | Vs best rule | Vs best model |
+|---|---|---|---|---|
+| (a) | Voting ensemble (T05) | 3.13 | 5/9, p = 0.57 | 4/9, p = 0.63 |
+| (a) | Pairwise ranking (T03) | 3.19 | 4/9, p = 0.67 | 3/9, p = 0.80 |
+| (a) | Recent seasons weighted (data streams) | 3.20 | 3/9, p = 0.52 | 0/9, p = 0.25 |
+| (a) | Team-style clusters as input (T07) | 3.24 | 3/9, p = 0.09 | 1/9, p = 0.09 |
+| (c) | Boosting, recent seasons weighted | 16.56 | 9/9, p = 0.004 | 3/9, p = 0.16 |
+| (c) | Two-step: any PIM?, then how many (T03 + T02) | 16.90 | 8/9, p = 0.008 | 1/9, p = 0.008 |
+| (c) | Stacking (T05) | 17.04 | 7/9, p = 0.13 | 0/9, p = 0.004 |
+| (c) | Rate × games (T02) | 17.57 | 4/9, p = 0.82 | 1/9, p = 0.03 |
+
+Best rule: Pythagorean (a, 3.16), Marcel (c, 17.17). Best model: linear with goal difference (a, 3.16), boosting with absolute error (c, 16.53).
+
+- **(a):** five very different methods all land at 3.13–3.24: the limit is the information before the season, not the method. Team-style groups (`figures/team_styles.png`) re-describe strength: the strongest group scores a lot and concedes little (1.13 of average next season); the weakest scores little, concedes a lot and takes the most penalties (0.85).
+- **(c):** none beats boosting with absolute error. Rate × games locates the error: games played (15.7 games off) is the unpredictable part; with real games the rate model would be 12.0 minutes off. Stacking fails because its weights are learned on squared error and change a lot between seasons.
+
+Experiment by experiment, with the reason for each: `docs/experiment_log.md`. Decisions and reasons: `docs/decisions.md`.
 
 ## Checkpoint (6 November)
 
