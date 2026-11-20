@@ -4,23 +4,38 @@ Everything we know and decided. Source for the slides. Who does what: `docs/task
 
 ## Methodology
 
-We follow CRISP-DM, the data mining method from class 1. Its six phases and where we are:
+We follow CRISP-DM (the CRISP-DM 1.0 step-by-step guide in the course resources). Its six phases and where we are:
 
-1. **Business understanding:** done (Task (a) and Task (b) below).
-2. **Data understanding:** table descriptions done; plots and findings in progress.
-3. **Data preparation:** team table, roster information, data quality checks and new teams done; coach table and the coach cases in progress.
-4. **Modeling:** started. Test loop, simple guesses and first models for (a) done (see Modeling below); (b) waits for the coach table.
-5. **Evaluation:** after the checkpoint.
-6. **Deployment:** final predictions and presentation.
+1. **Business understanding:** done for (a), (b) and (c) (below, and the goals table).
+2. **Data understanding:** table descriptions and plots for teams and coaches done; players for (c) in progress (Person 2).
+3. **Data preparation:** team table, roster, coach table, player table, quality checks, new teams done; feature selection, SMOTE, outliers and the first-season fill in progress (Person 3).
+4. **Modeling:** all three tasks have baselines and several model types (below).
+5. **Evaluation:** significance tests, overfitting, importance and learning curves done for the main models (below, notebook 05).
+6. **Deployment:** the presentation (slides due 4 December).
+
+**Where we went back (CRISP-DM is a loop, not a line):**
+- Modeling (a) → business understanding: the professor clarified the ranking is per conference, so the target and the ranking function changed (division → conference).
+- Modeling (b) → data preparation: the first model (AUC 0.62) led us back to build new inputs ("below usual level", coach playoff win %).
+- Data understanding → data preparation: new teams finished low, so filling them with the league average would be wrong; filled with earlier new clubs instead.
+
+## Goals: business → data mining
+
+| | Business goal | Data mining task | Target | Measure (why) | Baselines |
+|---|---|---|---|---|---|
+| (a) | Know before the season where each team will finish | Regression of points, then the NHL rules turn points into a ranking | Position in the conference (`conf_rank`) | Average positions off (easy to read) + Wilcoxon vs the simple guess | Random order; same order as last season |
+| (b) | Know before the season which teams will start with a new coach | Binary classification | `coach_change` (1 = new coach) | AUC (only 26% are changes, so accuracy is misleading: "never changes" already gets 74%); recall first, because missing a change is worse than a false alarm | "Never changes"; new coach if the team missed the playoffs |
+| (c) | Know before the season how many penalty minutes each player will get | Regression | `PIM` in the regular season | MAE in minutes (PIM is very skewed: a few enforcers would dominate a squared error) + Spearman (order of players) | Median; position average; same as last season; Marcel |
 
 ## Task (a): Final ranking
 
-- **What we predict:** each team's position in its division, the `rank` column (1st to last; from 1979 divisions had 4 to 7 teams).
+- **What we predict:** each team's position in its **conference** (`conf_rank`). Professor's clarification (13 November): if the data has conferences, rank per conference, and divisions can change the points order. Our data has conferences in every season from 1979.
+- **NHL rules used** (`conference_rank` in `src/evaluation.py`): 1979–1992 by points; 1993–1997 the 2 division winners are 1st–2nd; 1998–2009 the 3 division winners are 1st–3rd; ties by wins, then goal difference. Reproduces 99.5% of the real division ranks (the rest were head-to-head tie-breaks). Checked against the real 2009–10 playoff seeds: identical.
+- **Design decision:** models predict points per game vs the season average, then the rules give the position. The rules are fixed facts, so the model should not have to learn them.
 - **Season to predict:** any season requested, using only data from before it.
-- **We can use:** anything known the day before the first game, including the new season's rosters.
+- **We can use:** anything known the day before the first game, including the new season's rosters, conference and division.
 - **Who wants it:** stakeholders (club management, sponsors, the league) and betting: know before the season how teams will finish.
 - **How we measure it:** on average, how many positions off our prediction is.
-- **Simple guess to beat:** inside each division, the same order as last season's points per game (new teams last). Tested season by season (`src/evaluation.py`, `notebooks/03_modeling.ipynb`): scores 1.07 positions off on average over 2000–2009; random order scores 1.55.
+- **Simple guess to beat:** same order as last season's points, with the conference rules: 3.33 positions off (random order: 4.87). The older division results (1.07 simple guess) are kept below for the record; they cannot be compared with conference results, because conferences have 10–15 teams.
 
 ## Task (b): Coach change
 
@@ -31,6 +46,16 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 - **Missing a real change is much worse than a false alarm.** So we measure how many real changes we catch ("recall"), and check how many false alarms we raise ("precision").
 - **Simple guess to beat:** a team gets a new coach if it missed the playoffs last season.
 
+## Task (c): Penalty minutes
+
+- **What we predict:** for every player on a roster, his penalty minutes (`PIM`) in the regular season.
+- **Season to predict:** any season requested, using only data from before it. The player's team at the start of the season is known (the roster is known the day before); **his games played this season are not** (injuries, being sent down).
+- **Who wants it:** clubs (discipline, planning the line-up: a player in the penalty box cannot help the team), fantasy hockey and betting (PIM is a common category).
+- **Data:** `Scoring.csv` (one row per player, season and team: `PIM`, `GP`, `Pts`, `pos`), stints summed per season; `Teams.csv` for each team's penalty style last season. Player table: `data/player_table.csv`, built in `notebooks/04_penalty_minutes.ipynb` (24,712 player-seasons, 1979–2009).
+- **What the data looks like:** very skewed (mean 44, median 28, maximum 409, 12% have 0; the top 10% of players take a third of all minutes). Penalties per game changed by era (about 1.26 in 1986–92, 0.73 in 2004–09), so a player's history is compared to the league rate. 16% of player-seasons are a first NHL season (no history).
+- **How we measure it:** MAE (average minutes off), plus Spearman (are players in the right order?).
+- **Simple guesses to beat:** median for everyone; position average; same as last season; **Marcel** (last 3 seasons weighted 5/4/3, pulled toward the league average with 100 games, times an expected number of games; a classic sports forecast, simple and hard to beat).
+
 ## Data facts
 
 - 1909–2009, leagues NHA, NHL, PCHA, WCHL, WHA. 2004 is missing (lockout).
@@ -39,7 +64,7 @@ We follow CRISP-DM, the data mining method from class 1. Its six phases and wher
 
 ## Data preparation
 
-- **Data used:** NHL only, 1979–2009 (753 team-seasons). From 1979 the NHL is the only league in the data; earlier leagues are small and from a different era. Decided by the group; the professor agreed (less data, but more similar to today). Can be changed with `FIRST_YEAR` in notebook 02, and a different start year per task is worth testing later.
+- **Data used:** NHL only, 1979–2009 (753 team-seasons). From 1979 the NHL is the only league in the data; earlier leagues are small and from a different era. Decided by the group; the professor agreed (less data, but more similar to today). Can be changed with `FIRST_YEAR` in notebook 02. The learning curves (notebook 05) confirm 1979 gives enough training seasons.
 - **Team table:** one row per team per season, saved in `data/team_table.csv`. Built in `notebooks/02_data_preparation.ipynb`.
 - **Per game:** points and goals are divided by games played, because season lengths changed.
 - **Compared to the season average:** points, goals scored and goals conceded are divided by that season's league average (1.0 = average), because scoring levels and the points system changed (league average points per game: 1.00 in 1979–1998, 1.05 in 1999–2003, 1.12 in 2005–2009). The 2005 season scored 1.13 positions off with the simple guess, close to the 1.07 average, so the lockout did not break predictions.
@@ -73,7 +98,7 @@ Checked in `notebooks/02_data_preparation.ipynb` with the problems from chapter 
 | 2 | Points system changed (1999, 2005); 2005 follows 2003 | all | `last_pts_vs_avg`; 2005 kept | Decided, applied |
 | 3 | Players with no last season | 1036 returning, 3910 rookies | Returning: last season played; rookies: 0 | Decided, applied |
 | 4 | Goalies with no earlier NHL season left out of the goalie average | 16 teams where they played over half the minutes | Keep as it is: the value comes from the goalies with a record | Decided: limit for the slides |
-| 5 | Coaches: interim, co-coaches (DET 1998), empty games (OTT 2001) | 6 | Proposal: ignore interim and co-coaches for first/last coach; add up all spells of the same coach | Open (coach table) |
+| 5 | Coaches: interim, co-coaches (DET 1998), empty games (OTT 2001) | 6 | Rows with `notes` (interim and co-coaches) dropped for first/last coach; all spells of the same coach in a season added up | Decided, applied |
 | 6 | Ex-WHA clubs in 1979: roster from WHA stats | 4 | Keep as it is (outside the test seasons) | Decided: limit for the slides |
 | 7 | `div_size` as a decimal number | all | Whole number | Applied |
 | 8 | Roster = players who played during the season | all | Keep; do not use roster size or number of rookies (they depend on how the season goes) | Limit for the slides |
@@ -127,16 +152,68 @@ All with the 5 inputs above and settings chosen by the practice test (`notebooks
 - **Feature importance** (`figures/feature_importance_a.png`, scrambling each input in the test seasons): last season's points +0.22 positions off, 3-season average +0.09, roster goalies +0.03, roster players +0.02, new coach −0.02 (no help).
 - Overall finding for (a): last season's points first, the 3-season average second, everything else close to nothing; the limit is the information available before the season.
 
-### Task (b)
+### Task (a): per conference (current target)
 
-Not started: needs the coach table (coach change yes/no and coach information). Simple guess planned: new coach if the team missed the playoffs last season.
+`notebooks/03_modeling.ipynb`, section "ranking per conference". Models predict points, the NHL rules give the position.
 
-### Next steps
+| Guess or model | Positions off | Better / equal / worse than simple guess | Wilcoxon p | Training error |
+|---|---|---|---|---|
+| Random order | 4.87 | | | |
+| Simple guess: same order as last season | 3.33 | | | |
+| Linear: last season + 3-season average | 3.31 | 5 / 0 / 4 | 0.91 | |
+| **Linear: + last season's goal difference** | **3.16** | 6 / 2 / 1 | 0.27 | |
+| Linear: practice test chooses the input set | 3.18 | 6 / 1 / 2 | 0.23 | |
+| k-nearest neighbours (k = 50 most chosen) | 3.18 | 6 / 1 / 2 | 0.25 | 3.51 |
+| Gradient boosting (50 trees, depth 2) | 3.20 | 5 / 1 / 3 | 0.27 | 3.40 |
+| Decision tree (depth 3) | 3.37 | 4 / 1 / 4 | 0.77 | 3.73 |
 
-- Task (b): coach table, simple guess, first model.
-- More model types (a single decision tree to show on a slide, k-nearest neighbours, gradient boosting), chosen with the practice test.
-- Feature selection (filter and wrapper), starting from the overlapping pairs.
-- Task (c), once announced.
+- Goal difference helps: it shows a team's real strength better than points, which include luck in close games. Not proven (p above 0.05).
+- No model type is proven better than the simple guess; same conclusion as for divisions: the limit is what is known before the season.
+
+### Task (b): coach change
+
+`notebooks/03_modeling.ipynb`, Task (b). AUC over the 9 test seasons (0.5 = coin flip).
+
+| Guess or model | AUC | Better than simple guess | Wilcoxon p |
+|---|---|---|---|
+| Simple guess: new coach if missed playoffs | 0.56 | | |
+| Logistic regression, first 4 inputs (Person 2) | 0.62 | 6 / 9 | 0.20 |
+| **Logistic + "below usual level" + coach playoff win %, chosen fairly** | **0.68** | 8 / 9 | 0.012 |
+| Logistic, "split win%" set fixed | 0.67 | 9 / 9 | 0.004 |
+
+- New inputs: `pts_vs_usual` (last season's points minus the 3-season average) and `last_coach_po_win_pct` / `last_coach_reg_win_pct` (the coach's playoff and regular-season win %). Coaches with `notes` dropped and split spells summed, as in notebook 02.
+- Statistically proven better than the simple guess.
+- Weights and importance: below usual level matters most (scrambling it costs 0.12 AUC), then the number of coaches last season and the coach's playoff win %. Clubs replace the coach when the team falls below what it usually achieves; playoff wins protect him.
+- No overfitting: training AUC 0.69, test 0.67.
+- Cut-off chosen by the practice test with recall counted double: catches 90% of real changes (simple guess 56%), but says "yes" for 75% of teams (precision 26%).
+
+### Task (c): penalty minutes
+
+`notebooks/04_penalty_minutes.ipynb`. MAE in minutes over the 9 test seasons.
+
+| Guess or model | MAE | Better than Marcel | Wilcoxon p vs Marcel | Training MAE (2006–08) |
+|---|---|---|---|---|
+| Position average | 28.98 | | | |
+| Median | 27.30 | | | |
+| Same as last season | 18.37 | | | |
+| **Marcel** | 17.17 | | | |
+| k-nearest neighbours (k = 100) | 17.93 | 1 / 9 | 0.012 | 16.80 |
+| Linear | 17.62 | 0 / 9 | 0.004 | 16.65 |
+| Decision tree (depth 4) | 17.29 | 4 / 9 | 0.36 | 16.19 |
+| **Gradient boosting, absolute error** | **16.54** | 9 / 9 | 0.004 | 15.44 |
+| (not allowed) last rate × real games this season | 13.97 | | | |
+
+- Gradient boosting wins because it is trained on absolute error, the same thing MAE measures: it is not pulled up by the few enforcers. Proven better than Marcel. Linear and kNN are significantly *worse* than Marcel.
+- Most used inputs: last season's PIM, then the career rate; points per game a little. Position and team style add almost nothing once a player's history is known.
+- Log transform of PIM: helps gradient boosting with squared error (17.8 → 17.1), hurts linear regression (17.6 → 18.7). Kept absolute error instead.
+- The limit is games played this season (14.0 if they were known).
+
+### Model behaviour (`notebooks/05_model_behaviour.ipynb`)
+
+- **Learning curves** (train on the last 1, 3, 5, 10, 20 or all seasons; `figures/learning_curves.png`): (a) is flat (a 3-input linear model needs only 1 season); (c) improves until about 10 seasons, then flat. Every test season has at least 21 training seasons, so starting in 1979 is enough.
+- **Tree depth** (`figures/tree_depth_curves.png`): training error keeps falling with depth while test error falls then rises: best depth 3 for (a), about 6 for (c); deep trees memorise (c at depth 16: 8.9 training vs 23.9 test).
+
+Experiment by experiment, with the reason for each: `docs/experiment_log.md`.
 
 ## Checkpoint (6 November)
 
@@ -180,5 +257,10 @@ Not started: needs the coach table (coach change yes/no and coach information). 
 | [goals_per_game.png](../figures/goals_per_game.png) | Goals per game change a lot over time: lowest in 1928 (1.5), a jump during World War II, a peak in the 1980s (about 4.0), then down to about 2.6 by the early 2000s. Even within 1979–2009 scoring levels differ, so team stats are compared to their season's average. |
 | [gf_ga_points.png](../figures/gf_ga_points.png) | Goal difference explains almost all of a team's points (r = 0.96 with points per game) and most of its position in the division (Spearman −0.82): teams that score more than they concede finish high. |
 | [correlations.png](../figures/correlations.png) | Last season's points are the feature most related to the position (Spearman −0.50), then last rank (0.49), goals scored and conceded (±0.40) and the roster (−0.34 players, 0.31 goalies). Two pairs are almost redundant: last points vs last rank (−0.84) and last goals conceded vs roster goalies (0.85). |
-| [coach_changes.png](../figures/coach_changes.png) | |
-| [coach_change_vs_results.png](../figures/coach_change_vs_results.png) | |
+| [coach_changes.png](../figures/coach_changes.png) | About 27% of NHL teams start a season with a new coach, and teams that missed the playoffs change more often than average. The rate depends on the era (about 15% in 1943–67, 30% in 1968–92, 23% in 1993–2009). |
+| [points_by_coach_change.png](../figures/points_by_coach_change.png) | Teams that kept their coach had more consistent results, but changing coach did not guarantee improvement: neither group consistently outperformed the other. |
+| [pim_overview.png](../figures/pim_overview.png) | PIM is very skewed (median 28, maximum 409, 12% of players have 0) and fairly stable from one season to the next (Spearman 0.71), so a player's own history is the main input for (c). |
+| [learning_curves.png](../figures/learning_curves.png) | (a) is flat: a 3-input linear model learns as well from 1 season as from all. (c) improves until about 10 seasons, then flat. Starting in 1979 gives every test season at least 21 training seasons: enough. |
+| [tree_depth_curves.png](../figures/tree_depth_curves.png) | Deeper trees keep lowering the training error while the test error rises again (best depth 3 for (a), 6 for (c)): the clearest picture of overfitting in the project. |
+| [feature_importance_b.png](../figures/feature_importance_b.png) | "Below its usual level" is by far the most used input for coach changes (0.12 AUC lost when scrambled), then the number of coaches last season and the coach's playoff win %. |
+| [feature_importance_c.png](../figures/feature_importance_c.png) | Last season's PIM is by far the most used input for penalty minutes, then the career rate; position and team style add almost nothing once a player's history is known. |

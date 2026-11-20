@@ -8,9 +8,9 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
-| Requirements with the end user | Many business objectives + extra relevant business info | 🟡 Goals, stakeholders, "day before the season" rule, professor's answers | Add (c), the conference rule, and a short list of every question we asked the professor and the answer | P1 |
-| Business goals | Clearly and quickly identified | 🟡 (a) and (b) | Add (c): who wants PIM predictions (clubs: discipline and line-up planning; betting; fantasy hockey) | P1 |
-| Business → data mining goals | DM goals clearly aligned | 🟡 | One table: business goal → DM task type → target column → measure → baseline. (a) regression of points + NHL rules → conference rank; (b) classification, recall first; (c) regression of PIM | P1 |
+| Requirements with the end user | Many business objectives + extra relevant business info | ✅ Goals, stakeholders, constraints (day before the season; no games played for (c)), conference clarification, for all 3 tasks (`docs/project_notes.md`) | Slide: list of questions asked to the professor and the answers | P1 |
+| Business goals | Clearly and quickly identified | ✅ (a), (b), (c) | — | — |
+| Business → data mining goals | DM goals clearly aligned | ✅ Goals table in `docs/project_notes.md` | — | — |
 
 ## Data understanding (DU)
 
@@ -35,10 +35,10 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Redundancy | Systematic removal of redundant attributes | 🟡 | Correlation matrix, drop one of every pair above a fixed limit (e.g. 0.9), done the same way for all three tasks, inside the training seasons | P3 |
 | Missing data | Complex method (regression/classification) with correct setup | 🟡 Simple fill (average of earlier new teams) | For (c), players with no earlier season (18%): predict their PIM rate with a regression on position and other known values, learned on training seasons only | P3 |
 | Outliers | Identify, discuss, address with complex or domain approach | 🟡 Identified | Domain approaches: per-game values (short 1994 season); Marcel pulls players with few games toward the league average; enforcers kept but measured with MAE | P3 |
-| Transformation for algorithms | Adequate complex discretization or rescaling | 🟡 StandardScaler, vs season average | Add log transform of PIM and explain why (skewed); scaling only inside the pipeline | P1 |
-| Feature engineering | Complex methods AND business knowledge | ✅ Roster aggregation, 3-season averages, "below usual level", coach playoff win% | Add for (c): Marcel weighted average, PIM per game, career rate | P1 |
-| Sampling, domain-specific | Adequate subset of the population | ✅ NHL 1979–2009, justified | (c): decide and justify goalies (separate rule or left out) | P1 |
-| Sampling for development | Start very small, grow to significant | ❌ | Learning curve: train on the last 3, 5, 10, 20 seasons and show the error; this also justifies starting in 1979 | P1 |
+| Transformation for algorithms | Adequate complex discretization or rescaling | ✅ Values vs season average and vs league rate; StandardScaler inside pipelines; log(1 + PIM) tested with reasons (notebook 04, section 8) | — | — |
+| Feature engineering | Complex methods AND business knowledge | ✅ Roster aggregation, 3-season averages, "below usual level", coach playoff win%, goal difference, Marcel, career rate, team style | — | — |
+| Sampling, domain-specific | Adequate subset of the population | ✅ NHL 1979–2009, justified; learning curves confirm 1979 is enough | (c): goalies kept, with position as input (they get almost 0) | — |
+| Sampling for development | Start very small, grow to significant | ✅ Learning curves 1 → 20 → all seasons for (a) and (c) (notebook 05) | — | — |
 | Imbalanced data | SMOTE used correctly | ❌ class_weight only | SMOTE inside the training seasons only (imblearn pipeline), compared with class weights | P3 |
 | Feature selection | Filter AND wrapper, used correctly | ❌ | Filter (correlation) + wrapper (add one input at a time, practice test), inside training seasons, for all three tasks | P3 |
 
@@ -47,25 +47,25 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
 | Diversity of tasks | Classification AND regression | ✅ (b) classification; (a), (c) regression | — | — |
-| Diversity of algorithms | 4+ with very different biases | 🟡 (a) has 5; (b) only logistic | (b): decision tree, k-nearest neighbours, random forest or boosting, naive Bayes. (c): linear, tree, kNN, boosting | P2 (b), P1 (c) |
-| Parameter tuning | Systematic | ✅ Practice test over a grid | Same for (b) and (c); list the grids | All |
-| Understanding algorithm behaviour | Majority of algorithms, including the effect of parameters | 🟡 | One plot: training vs test error as tree depth grows (shows overfitting); one line per algorithm on how it learns | P1 |
+| Diversity of algorithms | 4+ with very different biases | 🟡 (a) 5 types, (c) 4 types; (b) only logistic in the notebook | (b): decision tree, kNN, random forest or boosting, naive Bayes; a small neural network on one task | P2 |
+| Parameter tuning | Systematic | ✅ Practice test over a grid for (a), (b) input sets and cut-off, (c) | List the grids on a slide | — |
+| Understanding algorithm behaviour | Majority of algorithms, including the effect of parameters | ✅ Tree-depth curves (notebook 05); explanations of why boosting with absolute error wins (c), why trees fail with ~30 teams (a), why log helps boosting but hurts linear | One line per algorithm on a slide | P1 |
 | Training vs test | Correct split, multiple splits | ✅ 9 test seasons, train only on earlier ones | — | — |
-| Other factors (time) | Correctly taken into account | ✅ Only data known before the season; 2005 follows 2003 | Check every new input of (b) and (c) for leaks | All |
-| Performance measure | Aligned with DM goals AND data characteristics | 🟡 | Write why: (a) positions off + Spearman (order matters); (b) AUC + recall (imbalanced, missing a change is worse); (c) MAE (skewed, in minutes) + RMSE + Spearman | P1 |
+| Other factors (time) | Correctly taken into account | ✅ Only data known before the season; 2005 follows 2003 | Checked: all inputs of (b) and (c) come from earlier seasons or the starting roster | — |
+| Performance measure | Aligned with DM goals AND data characteristics | ✅ Reasons in the goals table (`docs/project_notes.md`) | — | — |
 | Interpretation of measures | Advanced (e.g. AUC) | ✅ AUC in (b) | — | — |
-| Baseline | Suitable | 🟡 | 4 levels per task: no information, same as last season, hockey knowledge, ceiling (not allowed) | All |
-| Analysis of results | Tests for statistical significance | ✅ (a), (b) Wilcoxon | Same for (c) | P1 |
-| Overfitting | Correctly estimated and analysed | ✅ (a) | Same for (b) and (c) | P2, P1 |
-| Model improvement | Guided by performance goals | 🟡 | Experiment log: each attempt, why, result, kept or not (`docs/experiment_log.md`) | All |
-| Feature importance | Correct, related to hockey | ✅ (a) | Same for (b) and (c) | P2, P1 |
-| White-box models | Correct, related to hockey | ✅ (a) tree, (b) logistic weights | Tree for (b) and (c) | P2, P1 |
+| Baseline | Suitable | ✅ (a) random, last season; (b) never changes, missed playoffs; (c) median, position, last season, Marcel, ceiling | — | — |
+| Analysis of results | Tests for statistical significance | ✅ Wilcoxon for (a), (b), (c) | — | — |
+| Overfitting | Correctly estimated and analysed | ✅ (a), (b), (c), plus depth curves | New (b) models (P2) | P2 |
+| Model improvement | Guided by performance goals | ✅ `docs/experiment_log.md`: goal, attempt, result, decision | Keep adding new attempts | All |
+| Feature importance | Correct, related to hockey | ✅ (a), (b), (c) (`figures/feature_importance_*.png`) | — | — |
+| White-box models | Correct, related to hockey | ✅ (a) tree, (b) logistic weights | Tree drawn for (b) (P2) | P2 |
 
 ## Project management and tools
 
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
-| Methodology | Followed carefully, reflecting on the documentation | 🟡 CRISP-DM in the notes | Notes ordered by CRISP-DM phase; one line per phase on what we went back and changed | P1 |
+| Methodology | Followed carefully, reflecting on the documentation | ✅ CRISP-DM phases with status and where we went back (`docs/project_notes.md`) | — | — |
 | Plan | Detailed plan that guided the work | 🟡 | Dated plan in `docs/task_board.md` (done below), kept up to date | All |
 | PM tools | Detailed task sharing with an appropriate tool | 🟡 Markdown board | Move the board to GitHub Projects (issues with owner and date) | P1 |
 | Collaboration tools | Easy communication, data, workflows, documentation | 🟡 GitHub + WhatsApp | Keep data, notebooks and docs in GitHub; everyone pulls before working | All |

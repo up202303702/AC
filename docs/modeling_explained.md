@@ -1,5 +1,7 @@
 # Modeling, explained simply
 
+> **Note (20 November):** this file explains the first round of task (a), ranked per **division**. The professor later asked for a ranking per **conference**, and tasks (b) and (c) were added. The current results for all three tasks are in `docs/project_notes.md` (section *Modeling*), and every attempt is in `docs/experiment_log.md`. The ideas explained here (simple guess, season-by-season test, overfitting, practice test, Wilcoxon) are still exactly how everything is done.
+
 What we did for task (a), why the results are inconclusive, and what to do next. Code: `notebooks/03_modeling.ipynb`. Short version of the numbers: `docs/project_notes.md`, section *Modeling*.
 
 ## 1. What a "model" does here

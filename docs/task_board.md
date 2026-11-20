@@ -1,39 +1,45 @@
 # Task Board
 
 Owner in brackets. Move a task to "Done" when finished. Why each task exists: `docs/grading_checklist.md`.
-Deadline: **4 December**. Before working: `git pull`. After: commit and push.
+Deliver slides: **Thursday 4 December**. All analysis finished: **Thursday 27 November**. Before working: `git pull`. After: commit and push.
+Results do not count, only the grid (`docs/grading_checklist.md`): no more tuning for better numbers.
 
-## Week 1 · 16–22 November: data for (c), conference ranking, preparation
+## Part 1 · 20–24 November: the missing grid rows (❌ first)
 
-- [Person 1] Redo the other (a) models (tree, kNN, boosting, importance, tree figure) with the conference ranking (notebook 03, section "ranking per conference")
-- [Person 1] Learning curve (train on 3, 5, 10, 20 seasons) and tree-depth plot (training vs test error), for (a) and (c)
-- [Person 1] Business understanding for (c) and the goal → DM goal table (`docs/project_notes.md`)
+Check-in **Monday 24 November**: everyone says what is done and what is stuck.
+
+- [Person 1] Learning curve (train on 3, 5, 10, 20 seasons), for (a) and (c): "sampling for development"
+- [Person 1] Tree-depth plot (training vs test error): overfitting and effect of parameters
 - [Person 1] Experiment log (`docs/experiment_log.md`): every attempt so far, why, result, kept or not
-- [Person 2] Data understanding for (c): PIM distribution, PIM by era and position, season-to-season stability, with tests and findings (notebook 01)
-- [Person 2] One 3+D method and one 3+D plot (e.g. clustering players into types; PIM vs games vs points by position)
-- [Person 2] Player and coach tables as SQL queries in SQLite (`src/data_loading.py` already builds the database)
-- [Person 3] Name the 6 quality dimensions, one check each, also for the player table
-- [Person 3] Systematic redundancy removal (correlation limit, inside the training seasons)
-- [Person 3] Outliers: discuss enforcers, short seasons, players with few games
-- [Person 3] For (c): better guess for players in their first NHL season (16%): a regression on what is known (position, team), training seasons only (notebook 04)
-
-## Week 2 · 23–29 November: models for all three tasks
-
-- [Person 1] Improve (c): fewer, non-overlapping inputs; try a two-step model (PIM per game × expected games)
-- [Person 1] Final (a) model per conference, with significance test
-- [Person 2] More models for (b): tree, kNN, forest/boosting, naive Bayes; overfitting; importance; tree drawn
-- [Person 2] Rebuild `data/team_table_with_coaches.csv` on the current team table
-- [Person 2] One part of the work in a second analytics tool from the course
+- [Person 1] Board in GitHub Projects: "PM tools"
+- [Person 2] Data understanding for (c) in notebook 01: PIM distribution, by era and position, season-to-season stability; Spearman, Kruskal-Wallis; one finding per result
+- [Person 2] Clustering of player types + one 3+D plot (part in R)
+- [Person 2] Player and coach tables as SQL queries in SQLite: "database"
+- [Person 3] 6 quality dimensions named, one check each, also for the player table
 - [Person 3] SMOTE vs class weights for (b), training seasons only
-- [Person 3] Feature selection, filter + wrapper, for all three tasks
-- [Person 3] Missing values for (c): regression fill for players with no earlier season, training seasons only
+- [Person 3] Feature selection, filter + wrapper, for all three tasks, training seasons only
 
-## Week 3 · 30 November–4 December: evaluation and presentation
+## Part 2 · 25–27 November: the partly done rows (🟡)
 
+- [Person 1] Business understanding for (c) and the goal → DM goal → measure → baseline table for all 3 tasks (`docs/project_notes.md`)
+- [Person 1] Feature importance and overfitting for (b) and (c) where missing; log transform of PIM with the reason
+- [Person 1] Other (a) models with the conference ranking (tree, kNN, boosting)
+- [Person 2] More models for (b): tree (drawn), kNN, forest/boosting, naive Bayes; overfitting; importance
+- [Person 2] Small neural network on one task
+- [Person 2] Rebuild `data/team_table_with_coaches.csv` on the current team table
+- [Person 3] Systematic redundancy removal (correlation limit)
+- [Person 3] Outliers: detection method from T06 (IQR or isolation forest) + hockey-based decision
+- [Person 3] First-season players in (c): regression fill (age, height, weight from `Master.csv`, position), training seasons only
+- [Group] One finding sentence under every plot and result
+
+**Friday 27 November: analysis frozen.** After this, nothing new, only fixes.
+
+## Part 3 · 28 November–4 December: slides
+
+- [Group] Slide plan: each slide's message, plot or table, and the grid rows it covers
 - [Group] Final results table per task: baselines, best model, significance
-- [Group] Experiment log complete (`docs/experiment_log.md`)
 - [Group] Slides: one section per task, each person presents their part
-- [Group] Run-through with a timer
+- [Group] Run-through with a timer, before 4 December
 
 ## Done
 
