@@ -20,9 +20,11 @@ What is done is below, task by task, and what is left is at the end. The reasons
 | `notebooks/06_course_methods.ipynb` | Other approaches from the course methods for (a) and (c) |
 | `notebooks/07_results_plots.ipynb` | Result plots for all three tasks |
 | `src/evaluation.py` | Season-by-season test, practice test, conference ranking, scores |
+| `sql/` | The coach-change table (b) and the player-season table (c) as SQL queries (SQLite), run and checked in notebook 02 |
+| `R/player_types.R` | Player types and the position test in R (`Rscript R/player_types.R`) |
 | `data/` | `team_table.csv`, `team_table_with_coaches.csv`, `player_table.csv` |
 
-Run the notebooks in order (01 → 07). Notebook 02 writes the tables the others read.
+Run order: 02 (team tables) → 04 (player table) → 01 (uses both) → 03, 05, 06, 07.
 
 ## How we work
 
@@ -40,7 +42,8 @@ Run the notebooks in order (01 → 07). Notebook 02 writes the tables the others
 - 2005 follows 2003 (2004 was cancelled).
 - New teams (13) have no last season. They get the average first season of earlier new clubs, because new teams finish low, so the league average would be wrong.
 - Roster columns: last season's points of this season's players, and goals conceded by this season's goalies.
-- Coaches: interim and co-coach rows (`notes`) are ignored for first/last coach, and split spells of the same coach are added up.
+- Coaches: interim and co-coach rows (`notes`) are ignored for first/last coach, and split spells of the same coach are added up. `team_table_with_coaches.csv` is built at the end of notebook 02, on the finished team table.
+- The coach and player tables are also built in SQL (`sql/`): 100% the same as pandas.
 - Players (c): stints in one season are added up; players with no history get the median of first-season players of their position.
 
 ## Task (a): ranking in the conference
@@ -72,18 +75,31 @@ Measure: AUC (0.5 = coin flip, 1 = perfect), because with only 26% changes, "nev
 |---|---|---|
 | Random | 0.557 | |
 | Missed playoffs | 0.563 | |
-| Rule "below usual level", no learning | 0.687 | Yes (p = 0.02) |
+| Rule "below usual level", no learning | 0.692 | Yes (p = 0.008) |
 | Logistic regression, first 4 inputs | 0.616 | No (p = 0.20) |
-| Logistic regression with "below usual level" and the coach's playoff win % | 0.684 | Yes (p = 0.012) |
+| Logistic regression with "below usual level" and the coach's playoff win % | 0.683 | Yes (p = 0.012) |
+| Naive Bayes / decision tree / random forest (same inputs) | 0.677 / 0.674 / 0.671 | Yes (p ≤ 0.016) |
+| Gradient boosting / small neural network / k-nearest neighbours | 0.664 / 0.654 / 0.630 | Boosting and kNN: no; neural network: yes |
+| Association rules as a classifier (learned on 1979–1999 only) | 0.678 | — |
 
 - "Below usual level" = last season's points minus the 3-season average. Teams below it change coach 37% of the time, others 16%.
 - The model is as good as the one-line rule, but not better: the gain comes from the idea, not from the learning.
 - With a low cut-off the model catches 90% of real changes, but flags 75% of teams.
-- No overfitting (training AUC 0.69, test 0.67).
+- No overfitting for logistic regression (training AUC 0.69, test 0.67). The tree, random forest and boosting do memorise (training 0.73–0.75); the practice test picked their simplest settings.
+- Seven model types, none better than logistic regression or the "below usual" rule: as in (a), the limit is the information, not the algorithm. Every model relies first on "below usual level" (tree: `decision_tree_b.png`).
+- Association rules: "below usual AND changed coach mid-season AND coach won < 45%" → 59% change (2× the normal rate, still 1.8× on 2000–09); "at or above usual AND coach won 50%+ of playoff games" → 85% kept (95% on 2000–09).
+- Numbers after `team_table_with_coaches.csv` was rebuilt on the final team table (moved by ≤ 0.005 AUC).
 
 ## Task (c): penalty minutes
 
 Measure: average minutes off per player (MAE), because a few enforcers with 200+ minutes would dominate a squared error.
+
+What the data shows (notebook 01, "Players and penalty minutes"):
+- PIM is skewed (skewness 2.1; median 28, mean 44, 12% zero), so medians, Spearman and rank tests.
+- Per game it peaked in 1986–92 and fell by a third; the 2005 rules did not cut it (Mann-Whitney p = 0.93).
+- Defencemen get the most, then wings, then centres; goalies almost none (Kruskal-Wallis p ≈ 0).
+- A player's PIM rate is as stable as his scoring rate (Spearman 0.83 vs 0.86), his games played are not (0.57): the hard part of (c) is games.
+- Four player types (k-means on PIM rate, points per game, games): enforcers ~12%, scorers ~23%, regulars ~41%, part-timers ~25%. Enforcers stayed 10–13% in every era; scorers fell from 33% to ~18%. Same result in R.
 
 | Guess or model | Minutes off | Proven better than Marcel? |
 |---|---|---|
@@ -101,11 +117,7 @@ Measure: average minutes off per player (MAE), because a few enforcers with 200+
 ## Still to do
 
 Person 2
-- Data understanding for (c) in notebook 01: PIM by era and position, tests, player-type clustering, a 3+D plot, part in R.
-- Data preparation in SQL (player and coach tables as queries).
-- More models for (b): decision tree (drawn), kNN, random forest or boosting, naive Bayes, a small neural network; overfitting and importance for each.
-- Association rules for (b).
-- Notebook 02: move the coach cell to the end, so `team_table_with_coaches.csv` is built from the finished team table.
+- Done (see the task board): data understanding for (c) with clustering, 3+D plots and R; SQL preparation; more models and association rules for (b); coach table rebuilt.
 
 Person 3
 - Name the 6 quality dimensions, with one check each (also for the player table).
@@ -156,6 +168,11 @@ Data understanding (notebooks 01, 02)
 | `scatter_matrix_a.png` | Several (a) inputs overlap, e.g. last points vs 3-season average (0.83) |
 | `division_rule_effect.png` | The division rule changes the conference order for 16% of teams from 1998 |
 | `pim_overview.png` | PIM is very skewed (median 28, maximum 409) and fairly stable from season to season (0.71) |
+| `pim_distribution.png` | PIM is strongly right-skewed (skewness 2.1); much less on the log scale |
+| `pim_by_season.png` | Penalties per game peaked in the late 1980s and fell by a third; 2005 had more, then back to the 2000–03 level |
+| `pim_by_position.png` | Defencemen get the most penalties per game, then wings, then centres; goalies almost none |
+| `player_types.png` | Four player types in 3 variables: enforcers, scorers, regulars, part-timers |
+| `player_types_R.png` | The same four types found in R, with 4 variables (points, PIM, games as size, type as colour) |
 
 Models (notebooks 03–07)
 
@@ -164,6 +181,7 @@ Models (notebooks 03–07)
 | `decision_tree_a.png` | The tree first asks about last season's points, then the 3-season average and the goalies |
 | `feature_importance_a.png` | Last season's points matter most for (a), then the 3-season average |
 | `feature_importance_b.png` | "Below usual level" matters most for (b) |
+| `decision_tree_b.png` | The coach-change tree asks first "below its usual level?", then "did the coach win few games?", then "did the club change coach mid-season?" |
 | `feature_importance_c.png` | Last season's PIM matters most for (c), then the career rate |
 | `learning_curves.png` | (a) needs very little data; (c) improves up to about 10 seasons |
 | `tree_depth_curves.png` | Deeper trees memorise: best depth 3 for (a), 6 for (c) |

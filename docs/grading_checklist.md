@@ -16,15 +16,15 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
-| Diversity of statistical methods | Rich and justified set | 🟡 Descriptive stats, correlations, Wilcoxon, test on coach change vs playoffs | Add for (c): skewness, Spearman (not Pearson, because PIM is skewed), Mann-Whitney or Kruskal-Wallis for PIM by position; one line on why each method | P2 |
-| Complexity of statistical methods | Integrated 3+D methods with clear results | ❌ Mostly 1D/2D | One multivariate method per task: e.g. PCA of team stats, or clustering of players into types (enforcers, scorers, defenders) using PIM, points, games | P2 |
+| Diversity of statistical methods | Rich and justified set | ✅ Descriptive stats, skewness, Spearman, Wilcoxon, Mann-Whitney, Kruskal-Wallis, chi-square, k-means with silhouette; one line on why each (notebook 01, "Players and penalty minutes") | — | — |
+| Complexity of statistical methods | Integrated 3+D methods with clear results | ✅ k-means player types on 3 variables (PIM rate vs league, points per game, games), k by silhouette, repeated in R; team-style clusters (notebook 06); association rules on 11 items (b) | — | — |
 | Interpretation of statistical results | Generally correct | 🟡 | One finding sentence under every result | All |
-| Knowledge extraction (statistics) | Interesting, novel and non-trivial | 🟡 "Below its usual level" predicts a coach change; playoff wins protect the coach | Same for (c): e.g. the 2005 rule change cut penalties per game; how stable PIM is from season to season | P2 |
+| Knowledge extraction (statistics) | Interesting, novel and non-trivial | ✅ (b) "below its usual level" doubles coach changes (37% vs 16%, chi-square p ≈ 4e-10, holds with or without playoffs); playoff wins protect the coach (rules: 95% kept). (c) PIM rate is as stable as scoring (Spearman 0.83) but games are not (0.57); the 2005 rules did not cut penalties (p = 0.93); enforcers stayed 10–13% of players while scorers fell from 33% to ~18% | — | — |
 | Diversity of plots | Rich and justified set | 🟡 | List each plot with why it was chosen | All |
-| Complexity of plots | Integrated 3+D plots with clear results | 🟡 Goals scored vs conceded vs points; team styles (goals for, against, penalties, cluster: `team_styles.png`) | Add 3+D plots: PIM vs games vs points coloured by position; coach change vs last season vs 3-season average coloured by outcome | P2 |
-| Presentation (DU) | Well structured | 🟡 | Notebook 01 in sections: teams, coaches, players; same structure in the slides | P2 |
+| Complexity of plots | Integrated 3+D plots with clear results | ✅ `player_types.png` (3D + colour), `player_types_R.png` (x, y, size, colour), `coach_change_usual_level.png` (x, y, colour, size), `team_styles.png`, goals scored vs conceded vs points | — | — |
+| Presentation (DU) | Well structured | 🟡 Notebook 01: tables, team plots, coach plots, multivariate views of teams and coaches, players (c) | Same structure in the slides: teams → coaches → players | All |
 | Interpretation of plots | Generally correct | 🟡 | One finding sentence under every plot | All |
-| Visual knowledge extraction | Interesting, novel and non-trivial | 🟡 | See "knowledge extraction" above | P2 |
+| Visual knowledge extraction | Interesting, novel and non-trivial | ✅ Coach changes gather below the "usual level" diagonal; player types; penalties by era and position | — | — |
 
 ## Data preparation (DP)
 
@@ -47,7 +47,7 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Row | Top level | Now | To do | Who |
 |---|---|---|---|---|
 | Diversity of tasks | Classification AND regression | ✅ (b) classification; (a), (c) regression | — | — |
-| Diversity of algorithms | 4+ with very different biases | 🟡 (a) linear, tree, kNN, boosting, forest, pairwise logistic, voting ensemble; (c) linear, tree, kNN, boosting, two-step, stacking (notebook 06); (b) only logistic in the notebook | (b): decision tree, kNN, random forest or boosting, naive Bayes; a small neural network on one task | P2 |
+| Diversity of algorithms | 4+ with very different biases | ✅ (a) linear, tree, kNN, boosting, forest, pairwise logistic, voting; (b) logistic, tree, kNN, random forest, gradient boosting, naive Bayes, neural network, association rules; (c) linear, tree, kNN, boosting, two-step, stacking | — | — |
 | Parameter tuning | Systematic | ✅ Practice test over a grid for (a), (b) input sets and cut-off, (c) | List the grids on a slide | — |
 | Understanding algorithm behaviour | Majority of algorithms, including the effect of parameters | ✅ Tree-depth curves (notebook 05); explanations of why boosting with absolute error wins (c), why trees fail with ~30 teams (a), why log helps boosting but hurts linear | One line per algorithm on a slide | P1 |
 | Training vs test | Correct split, multiple splits | ✅ 9 test seasons, train only on earlier ones | — | — |
@@ -56,10 +56,10 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Interpretation of measures | Advanced (e.g. AUC) | ✅ AUC in (b) | — | — |
 | Baseline | Suitable | ✅ Several levels per task, including hockey rules with no learning: (a) random, last season, 3 seasons, goal difference, Pythagorean, roster; (b) never changes, random, missed playoffs, below usual level, coach playoff win %, mid-season change; (c) median, position, last season, Marcel, ceiling | — | — |
 | Analysis of results | Tests for statistical significance | ✅ Wilcoxon for (a), (b), (c) | — | — |
-| Overfitting | Correctly estimated and analysed | ✅ (a), (b), (c), plus depth curves | New (b) models (P2) | P2 |
+| Overfitting | Correctly estimated and analysed | ✅ (a), (b), (c), plus depth curves; (b) new models: tree 0.73 / forest 0.74 / boosting 0.75 training AUC vs 0.66–0.67 test, logistic and naive Bayes do not memorise | — | — |
 | Model improvement | Guided by performance goals | ✅ `docs/experiment_log.md`: goal, attempt, result, decision | Keep adding new attempts | All |
 | Feature importance | Correct, related to hockey | ✅ (a), (b), (c) (`figures/feature_importance_*.png`) | — | — |
-| White-box models | Correct, related to hockey | ✅ (a) tree, (b) logistic weights | Tree drawn for (b) (P2) | P2 |
+| White-box models | Correct, related to hockey | ✅ (a) tree, (b) logistic weights, tree drawn (`decision_tree_b.png`) and association rules (AUC 0.678 as a classifier) | — | — |
 
 ## Project management and tools
 
@@ -69,8 +69,8 @@ Status: ✅ at top level · 🟡 partly · ❌ missing
 | Plan | Detailed plan that guided the work | 🟡 | Dated plan in `docs/task_board.md` (done below), kept up to date | All |
 | PM tools | Detailed task sharing with an appropriate tool | 🟡 Markdown board | Move the board to GitHub Projects (issues with owner and date) | P1 |
 | Collaboration tools | Easy communication, data, workflows, documentation | 🟡 GitHub + WhatsApp | Keep data, notebooks and docs in GitHub; everyone pulls before working | All |
-| Analytics tools | Multiple tools from the course | ❌ Python only | Run at least one part in a second tool shown in class (check which ones the labs used) | P2 |
-| Database | Extensive use for exploration and preparation | ❌ SQLite built, hardly used | Do real preparation steps in SQL: e.g. the player-season table and the coach table as SQL queries | P2 |
+| Analytics tools | Multiple tools from the course | ✅ Python + R (`R/player_types.R`: Kruskal-Wallis, k-means, plot) + SQL (SQLite) | — | — |
+| Database | Extensive use for exploration and preparation | ✅ Preparation: player-season and coach-change tables as SQL queries (`sql/`, window functions), 100% equal to pandas (notebook 02); exploration: penalties per game by season in SQL (notebook 01) | — | — |
 | Other tools | Extensive and correct | 🟡 matplotlib, scikit-learn, scipy | Add imbalanced-learn (SMOTE); list all tools with their use | P3 |
 
 ## Presentation (last week)

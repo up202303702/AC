@@ -12,9 +12,6 @@ Check-in **Monday 24 November**: everyone says what is done and what is stuck.
 - [Person 1] Tree-depth plot (training vs test error): overfitting and effect of parameters
 - [Person 1] Experiment log (`docs/experiment_log.md`): every attempt so far, why, result, kept or not
 - [Person 1] Board in GitHub Projects: "PM tools"
-- [Person 2] Data understanding for (c) in notebook 01: PIM distribution, by era and position, season-to-season stability; Spearman, Kruskal-Wallis; one finding per result
-- [Person 2] Clustering of player types + one 3+D plot (part in R)
-- [Person 2] Player and coach tables as SQL queries in SQLite: "database"
 - [Person 3] 6 quality dimensions named, one check each, also for the player table
 - [Person 3] SMOTE vs class weights for (b), training seasons only
 - [Person 3] Feature selection, filter + wrapper, for all three tasks, training seasons only
@@ -24,9 +21,6 @@ Check-in **Monday 24 November**: everyone says what is done and what is stuck.
 - [Person 1] Business understanding for (c) and the goal → DM goal → measure → baseline table for all 3 tasks (`docs/project_notes.md`)
 - [Person 1] Feature importance and overfitting for (b) and (c) where missing; log transform of PIM with the reason
 - [Person 1] Other (a) models with the conference ranking (tree, kNN, boosting)
-- [Person 2] More models for (b): tree (drawn), kNN, forest/boosting, naive Bayes; overfitting; importance
-- [Person 2] Small neural network on one task
-- [Person 2] Rebuild `data/team_table_with_coaches.csv` on the current team table
 - [Person 3] Systematic redundancy removal (correlation limit)
 - [Person 3] Outliers: detection method from T06 (IQR or isolation forest) + hockey-based decision
 - [Person 3] First-season players in (c): regression fill (age, height, weight from `Master.csv`, position), training seasons only
@@ -43,6 +37,13 @@ Check-in **Monday 24 November**: everyone says what is done and what is stuck.
 
 ## Done
 
+- [Person 2] Data understanding for (c) in notebook 01: PIM distribution and skewness, by era (SQL query; Mann-Whitney on the 2005 rule change), by position (Kruskal-Wallis, Mann-Whitney), season-to-season stability (Spearman), one finding per result
+- [Person 2] Clustering of player types (k-means on 3 variables, k by silhouette) + 3+D plots (`player_types.png`, `coach_change_usual_level.png` with a chi-square test)
+- [Person 2] Part in R: `R/player_types.R` (Kruskal-Wallis, k-means, 4-variable plot `player_types_R.png`), same result as Python
+- [Person 2] Player and coach tables as SQL queries (`sql/`), run and checked in notebook 02: 100% equal to pandas
+- [Person 2] More models for (b): decision tree (drawn, `decision_tree_b.png`), kNN, random forest, gradient boosting, naive Bayes, small neural network; overfitting; importance (notebook 03)
+- [Person 2] Association rules for (b) (Apriori, learned on 1979–1999, checked on 2000–2009) (notebook 03)
+- [Person 2] Rebuilt `data/team_table_with_coaches.csv` on the final team table (notebook 02); `prev_year` no longer leaks into `data/team_table.csv`
 - [Person 1] (c) player table, baselines (median, position, same as last season, Marcel) and 4 models (`notebooks/04_penalty_minutes.ipynb`): gradient boosting 16.5 minutes off vs Marcel 17.2, better in 9/9 seasons (p = 0.004)
 - [Person 1] (a) per conference: real conference rank, baselines, points models with goal difference: 3.16 vs 3.33 positions off, not proven (p = 0.27) (notebook 03)
 - [Person 1] Improved (b): "below usual level" and coach playoff win%, AUC 0.68, beats the simple guess (Wilcoxon p ≈ 0.01)

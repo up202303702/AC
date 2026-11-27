@@ -2,7 +2,7 @@
 
 Every important choice in the project: what we decided, what else we could have done, **why**, where the evidence is, and which row of the grading grid it serves (`docs/grading_checklist.md`). Results are in `docs/project_notes.md`; attempts in order are in `docs/experiment_log.md`.
 
-Ordered by CRISP-DM phase. **Planned** = decided, not built yet (left: M14, Person 2).
+Ordered by CRISP-DM phase. **Planned** = decided, not built yet.
 
 ## 1. Business understanding
 
@@ -22,6 +22,9 @@ Ordered by CRISP-DM phase. **Planned** = decided, not built yet (left: M14, Pers
 | DU2 | **Spearman** correlation (order), not Pearson (straight line) | Pearson | PIM, points and ranks are skewed or are positions; Spearman only assumes "more goes with more" | Notebook 01, notebook 04 section 3 | DU: diversity / interpretation of statistical methods |
 | DU3 | Plot values **over time** before using them | Treat all seasons as alike | Goals per game, points per game and penalties per game changed by era, so raw values are not comparable | `goals_per_game.png`; PIM by era 1.26 → 0.73 per game (notebook 04) | DU: knowledge extraction |
 | DU4 | Check the **coach-change rate by era** | One rate for all years | Rates differ (about 15% in 1943–67, 30% in 1968–92, 23% in 1993–2009), so the training years matter | `coach_changes.png` | DU: knowledge extraction |
+| DU5 | (c): **rank tests** (Kruskal-Wallis by position, Mann-Whitney before/after 2005) and **chi-square** for coach change vs "below usual" | ANOVA, t-test | PIM is skewed (skewness 2.1, 12% zeros): rank tests need no normal distribution; chi-square fits two yes/no variables | Notebook 01, "Players and penalty minutes" and "Coach changes in more dimensions" | DU: diversity of statistical methods |
+| DU6 | **Player types by k-means on 3 variables** (PIM per game vs league, points per game, games), scaled; **k = 4** | k = 3 (same silhouette, 0.35); 2 variables only | Penalties and points are unrelated (Spearman 0.00), so a player needs both, plus games, which separate part-timers from regulars; k = 4 keeps part-timers apart, which matters for (c) | `player_types.png`; same result in R (`player_types_R.png`) | DU: complexity of statistical methods and plots |
+| DU7 | Repeat the player-type analysis **in R** (base R, no packages) | Python only | A second tool from the course; same groups and test results confirm the analysis | `R/player_types.R` | Tools: analytics tools |
 
 ## 3. Data preparation
 
@@ -39,6 +42,8 @@ Ordered by CRISP-DM phase. **Planned** = decided, not built yet (left: M14, Pers
 | DP10 | **Engineered inputs from hockey knowledge**: 3-season average, "below usual level", goal difference, Pythagorean expectation, coach playoff win %, Marcel rate, career rate, team style | Only the raw columns | Each answers a hockey question: one season can be luck; clubs fire coaches when a team falls below what it expects; goals say more than points; few games are unreliable | Notebooks 02–04 | DP: feature engineering (methods AND knowledge) |
 | DP11 | **Log of PIM tested, not kept** | Always log a skewed target | It helps a flexible model (17.8 → 17.1) but hurts a straight line (17.6 → 18.7); training on absolute error solves the same problem directly | Notebook 04 section 8 | DP: transformation |
 | DP12 | **Scaling inside the model pipeline** (StandardScaler) for k-nearest neighbours and logistic regression | Scale the whole table once | Distances and weights depend on scale; fitting the scaler on all data would leak test information | Notebooks 03, 04 | DP: transformation; training vs test |
+| DP13 | Build the **coach-change and player-season tables also in SQL** (SQLite, window functions `LAG`/`ROW_NUMBER`), and compare with pandas | pandas only | The grid asks for real preparation in a database; matching both versions checks the preparation (100% equal; found that `SUM` of only empty values is NULL in SQL but 0 in pandas → `COALESCE`) | `sql/`, notebook 02 | Tools: database; DP: data integration |
+| DP14 | **`team_table_with_coaches.csv` rebuilt on the final team table** | Keep it built halfway through notebook 02 | It was built before the new teams were filled and the extra inputs added; now one consistent table (results of (b) moved by ≤ 0.005 AUC) | Notebook 02, last sections | DP: data integration; consistency |
 
 ## 4. Modeling
 
@@ -57,7 +62,9 @@ Ordered by CRISP-DM phase. **Planned** = decided, not built yet (left: M14, Pers
 | M11 | (a): **team-style clusters** (k-means on goals for/against, penalties, power play, penalty kill) as an input; k chosen by the practice test. Player types for (c) are Person 2's clustering | Only raw inputs | Teams with the same points may play differently, and styles may last differently (course T07). Scaler and k-means fitted on training seasons only. Result: 3.24, no gain; the groups re-describe strength (`team_styles.png`) | Notebook 06, A3 | DU complexity (3+D); feature engineering |
 | M12 | (c): **rate × games** (two regressions), and a **two-step model** (classifier: any PIM?, then regressor) | One model for the total | Games played is the biggest unknown (BU4) and 12% get 0: splitting the problem makes each part simpler and explainable (T02 + T03). Result: rate × games 17.57, but it located the error (games 15.7 off; rate × real games 12.0); two-step 16.90 | Notebook 06, C1 and C2 | Model improvement; understanding behaviour |
 | M13 | **Recent seasons count more** (weight decay^years ago; decay chosen by the practice test), for (a) and (c) | All seasons equal | The game changes over time (DU3); the idea of data streams / online learning. Result: the practice test mostly chose "all equal"; old seasons do not hurt because values are already compared with their season's average | Notebook 06, A4 and C4 | Other factors (time) |
-| M14 | **Planned (b): association rules** (Person 2) | Only classifiers | Rules like "missed playoffs AND below usual → new coach" with support and confidence are directly readable (course T08) | — | White-box; knowledge extraction |
+| M14 | **(b): association rules** (Apriori, minimum support 3%, on 11 yes/no items), learned on **1979–1999 only** and checked on 2000–2009 | Only classifiers | Rules like "below usual AND changed coach mid-season → new coach" with support, confidence and lift are directly readable (course T08). Result: change rules keep a lift of 1.4–2.0 on new seasons; "at or above usual AND coach won 50%+ of playoff games" → 95% kept (2000–09); as a classifier AUC 0.678, same as logistic | Notebook 03, "Task (b): association rules" | White-box; knowledge extraction |
+| M15 | (b): **seven model types** on the same 7 inputs (logistic, tree, kNN, random forest, gradient boosting, naive Bayes, small neural network), settings by the practice test on AUC | Logistic only | Different biases: if all agree, the limit is the data. Result: AUC 0.63–0.68, none better than logistic or the "below usual" rule; flexible models memorise (training 0.73–0.75); the practice test always picked the simplest setting | Notebook 03, "Task (b): more model types" | Diversity of algorithms; overfitting; understanding behaviour |
+| M16 | (b): models without class weights (kNN, neural network) **compared with AUC**; naive Bayes with equal priors | Resampling for every model | AUC does not depend on the cut-off, so class weights only matter for the yes/no answer, not for the ranking that AUC measures | Notebook 03 | Imbalanced data; performance measure |
 
 ## 5. Evaluation
 

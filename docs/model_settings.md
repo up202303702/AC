@@ -61,6 +61,19 @@ All models predict **points per game vs the season average** (`pts_vs_avg`); the
 - **Chosen by the practice test:** "+ below usual" in 6 seasons, "split win%" in 3.
 - **Cut-off for "yes, new coach":** tried 0.3, 0.4, 0.5, 0.6; chosen with a score that counts recall twice as much as precision (F2), because missing a change is worse than a false alarm. Chosen: 0.3 (4 seasons), 0.4 (3), 0.5 (2).
 
+**More model types (Person 2, notebook 03 "Task (b): more model types"):** all on the 7 inputs of "+ below usual"; missing values filled with the training median; settings chosen by the practice test on AUC.
+
+| Model | Settings tried | Chosen most | Why these values |
+|---|---|---|---|
+| Decision tree | depth 2, 3, 4 × at least 10 or 30 teams per final box; class weights | depth 4, 10 teams | Same range as (a): from "too simple" to "starts memorising" |
+| k-nearest neighbours | k = 15, 50, 100; inputs scaled | k = 100 | ~500–700 team-seasons: 15 is local, 100 is smooth |
+| Random forest | 300 trees × at least 5, 15 or 30 teams per final box; class weights per tree sample | 30 teams | Bigger boxes = less memorising |
+| Gradient boosting | 50 or 150 trees × depth 2 or 3; learning rate 0.05; class weights (`HistGradientBoostingClassifier`) | 50 trees, depth 2 | Small, slow and shallow is the safe choice for small data |
+| Naive Bayes (Gaussian) | equal priors (0.5 / 0.5) | — | Equal priors play the role of class weights |
+| Neural network | one hidden layer of 4 or 16 neurons × weight penalty (alpha) 0.01 or 1; inputs scaled | 4 neurons, alpha 1 | Few neurons and a strong penalty keep it from memorising ~600 rows |
+
+**Association rules:** 11 yes/no items (missed playoffs; below usual level; far below usual, < −0.10; weak season, < 0.9 of average; coach won no playoff game; changed coach mid-season; coach in his 1st season; coach 4+ seasons; coach won < 45% in the regular season; at or above usual level; coach won 50%+ of playoff games). Apriori up to 3 items, minimum support 3%; rules kept with confidence ≥ 0.40 (change) or ≥ 0.85 (keep). Thresholds set from hockey sense and the notebook 01 plots, not tuned. Learned on 1979–1999 only.
+
 ## Task (c): penalty minutes (notebooks 04, 05, 06)
 
 **Inputs (20, all from earlier seasons or the starting roster):** `PIM_1`, `PIM_2`, `PIM_3`, `GP_1`, `GP_2`, `GP_3`, `rate_1`, `career_rate`, `marcel_rate_vs_league`, `games_guess`, `pts_rate_1`, `seasons_before`, `first_season`, `pos_C`, `pos_D`, `pos_L`, `pos_R`, `pos_G`, `team_style_last`, `league_rate_last`. Missing history is −1 for linear, tree and kNN; gradient boosting handles missing values itself.
